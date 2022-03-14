@@ -6,6 +6,8 @@ import {Toast} from 'primeng/toast';
 import { ethers } from 'ethers';
 import { PrimeNGConfig } from 'primeng/api';
 
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+
 @Component({
   selector: 'app-index-main',
   templateUrl: './index-main.component.html',
@@ -34,12 +36,19 @@ export class IndexMainComponent implements OnInit {
   i_amount !: number
   i_address !: String
 
-
+  TokenFormGroup !: FormGroup
+  inputAmount: any
 
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig) { }
 
   ngOnInit(): void {
+
+    this.TokenFormGroup = new FormGroup({
+        inputAmount:  new FormControl('', [ Validators.required, Validators.pattern('[a-zA-Z][a-zA-Z\s]+') ]),
+      });
+  
+       
 
     this.PrimeNGConfig.ripple = true
 
@@ -258,11 +267,17 @@ export class IndexMainComponent implements OnInit {
             this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
         }
 
+        get f()
+        {
+            return this.TokenFormGroup.controls;
+        }
+
         confirmFeeModal()
         {
-            console.log(this.i_amount)
-            console.log(this.i_address)
+            console.log("Test")
         }
+
+        
 
         // decrypytPrivateKey()
         // {

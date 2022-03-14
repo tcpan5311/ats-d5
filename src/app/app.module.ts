@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { IndexMainComponent } from './index-main/index-main.component';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import {AccordionModule} from 'primeng/accordion'; 
 import {MenubarModule} from 'primeng/menubar';
 import {ButtonModule} from 'primeng/button';
@@ -21,6 +21,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ToastModule } from 'primeng/toast';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import {BlockUIModule} from 'primeng/blockui';
+import {MessageModule} from 'primeng/message';
 
 
 @NgModule({
@@ -34,6 +35,7 @@ import {BlockUIModule} from 'primeng/blockui';
     AccordionModule,
     BrowserAnimationsModule,
     FormsModule,
+    ReactiveFormsModule,
     MenubarModule,
     ButtonModule,
     InputTextModule,
@@ -44,7 +46,8 @@ import {BlockUIModule} from 'primeng/blockui';
     HttpClientModule,
     ToastModule,
     ProgressSpinnerModule,
-    BlockUIModule
+    BlockUIModule,
+    MessageModule
   ],
   providers: [],
   bootstrap: [AppComponent]
