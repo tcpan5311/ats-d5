@@ -5,6 +5,7 @@ import {Message,MessageService} from 'primeng/api';
 import {Toast} from 'primeng/toast';
 import { ethers } from 'ethers';
 import { PrimeNGConfig } from 'primeng/api';
+import { AbstractControl } from '@angular/forms';
 
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
@@ -44,8 +45,36 @@ export class IndexMainComponent implements OnInit {
 
   ngOnInit(): void {
 
+    let amount_regex = "^[0-9]*(\.[0-9]{0,2})?$"
+
+    function addressFormatValidator(control: AbstractControl): { [key: string]: boolean } | null {
+
+       function isNotAddress(address:string)
+       {
+        try 
+        {
+            ethers.utils.getAddress(address)
+            return false
+        } 
+        catch (error) 
+        { 
+            return true
+        }
+            
+       }
+
+        if (control.value !== undefined && control.value != "" && isNotAddress(control.value)) 
+        {
+            return { 'addressValid': true };
+        }
+        
+        return null;
+        
+    }
+
     this.TokenFormGroup = new FormGroup({
-        inputAmount:  new FormControl('', [ Validators.required, Validators.pattern('[a-zA-Z][a-zA-Z\s]+') ]),
+        inputAmount:  new FormControl('', [Validators.required, Validators.pattern(amount_regex), Validators.max(10000)]),
+        inputAddress:  new FormControl('', [Validators.required,addressFormatValidator]),
       });
   
        
@@ -89,6 +118,11 @@ export class IndexMainComponent implements OnInit {
             }
             
         ];
+    }
+
+    get f()
+    {
+        return this.TokenFormGroup.controls;
     }
 
     openKeystoreModal()
@@ -161,37 +195,37 @@ export class IndexMainComponent implements OnInit {
     }
     
  
-   connectWallet(metamask = this.eth)
-    {
+//    connectWallet(metamask = this.eth)
+//     {
 
-            // return new Promise((resolve,reject)=>{
+//             return new Promise((resolve,reject)=>{
     
-            //     try
-            //     {
-            //         if(!metamask) 
-            //         {
-            //             return alert('Please install Metamask')
-            //         }
+//                 try
+//                 {
+//                     if(!metamask) 
+//                     {
+//                         return alert('Please install Metamask')
+//                     }
     
-            //         else
-            //         {
-            //             Promise.all([metamask.request({ method: 'eth_requestAccounts' })]).then(([accounts])=>{
+//                     else
+//                     {
+//                         Promise.all([metamask.request({ method: 'eth_requestAccounts' })]).then(([accounts])=>{
     
-            //                 console.log(accounts[0])
-            //                 resolve(accounts)
+//                             console.log(accounts[0])
+//                             resolve(accounts)
     
-            //             })
-            //         }
+//                         })
+//                     }
                     
-            //     }
-            //     catch(error)
-            //     {
-            //         console.log(error)
-            //         throw new Error('No Ethereum object')
-            //     }
+//                 }
+//                 catch(error)
+//                 {
+//                     console.log(error)
+//                     throw new Error('No Ethereum object')
+//                 }
     
-            // })
-    }
+//             })
+//     }
 
 
         decryptFromPhase(mnemonic: any)
@@ -199,14 +233,15 @@ export class IndexMainComponent implements OnInit {
             if(this.accountLoaded == false)
             {
                 let walletPath = {
-                    "standard": "m/44'/60'/0'/0/0", // Changing the last digit will give the sequence of address
+                    "standard": "m/44'/60'/0'/0/0", 
+                    // Changing the last digit will give the sequence of address
                     // For Ex: "m/44'/60'/0'/0/1" will give 2nd Address
                 
                 };
                 
                 try
                 {
-                    // let mnemonic = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
+                    //mnemonic phase = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
                     const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
                     
                     const node = hdnode.derivePath(walletPath.standard);
@@ -254,27 +289,31 @@ export class IndexMainComponent implements OnInit {
                 this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
             })
             
-
         }
 
         disconnectWallet()
         {
+            //Use boolean to set button value - More organized
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
             this.panelBalanceLabel = "Balance not available"
             this.accountLoaded = false
             this.cdr.detectChanges()
             this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
-        }
-
-        get f()
-        {
-            return this.TokenFormGroup.controls;
-        }
+        }       
 
         confirmFeeModal()
         {
-            console.log("Test")
+            if(this.accountLoaded == false)
+            {
+                console.log("Account not loaded!")
+            }
+
+            else
+            {
+                console.log(this.TokenFormGroup.value);
+            }
+            
         }
 
         
