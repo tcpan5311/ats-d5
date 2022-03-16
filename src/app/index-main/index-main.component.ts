@@ -8,6 +8,7 @@ import { PrimeNGConfig } from 'primeng/api';
 import { AbstractControl } from '@angular/forms';
 
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { IndexMainService } from './index-main.service';
 
 @Component({
   selector: 'app-index-main',
@@ -22,7 +23,7 @@ export class IndexMainComponent implements OnInit {
   displayModal:any;
   window: any;
   eth: any
-  private_key : any
+  privateKey : any = ""
   connectButtonLabel = "Connect wallet"
   panelAddressLabel = "Wallet not connected"
   panelBalanceLabel = "Balance not available"
@@ -41,9 +42,12 @@ export class IndexMainComponent implements OnInit {
   inputAmount: any
 
 
-  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig) { }
+  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService) { }
 
   ngOnInit(): void {
+    
+    console.log(this.ims.getContractABI())
+    console.log(this.ims.getContractAddress())
 
     let amount_regex = "^[0-9]*(\.[0-9]{0,2})?$"
 
@@ -248,11 +252,11 @@ export class IndexMainComponent implements OnInit {
                     
                     this.connectButtonLabel = (`${node.address.slice(0, 7)} ... ${node.address.slice(35)}`)
                     this.panelAddressLabel = (`${node.address.slice(0, 7)} ... ${node.address.slice(35)}`)
-                    this.accountLoaded = true
                     this.displayModal = false
     
                     // console.log(node.privateKey)
                     // let wallet = new ethers.Wallet(node.privateKey);
+                    this.privateKey = node.privateKey
                     this.getBalance(node.address)
                     this.uploadedFiles = []
                     this.blockedPanel = false
@@ -287,13 +291,14 @@ export class IndexMainComponent implements OnInit {
                 const balanceInEth = ethers.utils.formatEther(balance)
                 this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
                 this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
+                this.accountLoaded = true
             })
             
         }
 
         disconnectWallet()
         {
-            //Use boolean to set button value - More organized
+            this.privateKey = ""
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
             this.panelBalanceLabel = "Balance not available"
@@ -302,16 +307,62 @@ export class IndexMainComponent implements OnInit {
             this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
         }       
 
+        // getEthereumContract()
+        // {
+
+
+        //     // const provider = new ethers.providers.Web3Provider(ethereum)
+        //     // const provider =  new ethers.providers.AlchemyProvider("rinkeby","ZntU6uxAx4IzPsZhH9TB5o0R6UvHuM3J")
+
+
+        //     // const signer = provider.getSigner()
+        //     const transactionContract = new ethers.Contract(
+        //       contractAddress,
+        //       contractABI,
+        //       signer,
+        //     )
+          
+        //     return transactionContract
+        //   }
+
         confirmFeeModal()
         {
             if(this.accountLoaded == false)
             {
-                console.log("Account not loaded!")
+                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
             }
 
             else
             {
-                console.log(this.TokenFormGroup.value);
+                const toAmount = this.TokenFormGroup.value.inputAmount
+                const parsedAmount = ethers.utils.parseEther(toAmount)
+                const toAddress = this.TokenFormGroup.value.inputAddress
+
+                const provider = ethers.getDefaultProvider('rinkeby');
+                const wallet = new ethers.Wallet(this.privateKey,provider)
+
+                const tx = 
+                {
+                    to: toAddress,
+                    gasLimit: 50000,
+                    value: parsedAmount._hex,
+                }
+
+                Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
+                {
+                    console.log('txHash:'+ txObj.hash)
+                })
+
+                // let contractAddress = this.ims.getContractAddress()
+                // let contractABI = this.ims.getContractABI()
+
+                // // const contract = new ethers.Contract(contractAddress,contractABI,wallet)
+
+                // wallet.sendTransaction(tx).then((txObj)=>
+                // {
+                //     console.log('txHash', txObj.hash)
+                // })
+
             }
             
         }
