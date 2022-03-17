@@ -20,7 +20,8 @@ export class IndexMainComponent implements OnInit {
 
 
   items !: MenuItem[];
-  displayModal:any;
+  displayModal:any
+  txReviewModal: any
   window: any;
   eth: any
   privateKey : any = ""
@@ -40,6 +41,10 @@ export class IndexMainComponent implements OnInit {
 
   TokenFormGroup !: FormGroup
   inputAmount: any
+
+  disableClick: any = true
+  txReviewModalSiteLabel: string = window.location.href
+  txReviewAmountLabel: string = ""
 
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService) { }
@@ -327,6 +332,15 @@ export class IndexMainComponent implements OnInit {
 
         confirmFeeModal()
         {
+            
+            this.txReviewModal = true
+            this.txReviewAmountLabel = this.TokenFormGroup.value.inputAmount
+            
+        }
+
+        sendTransaction()
+        {
+
             if(this.accountLoaded == false)
             {
                 this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
@@ -337,31 +351,33 @@ export class IndexMainComponent implements OnInit {
                 const toAmount = this.TokenFormGroup.value.inputAmount
                 const parsedAmount = ethers.utils.parseEther(toAmount)
                 const toAddress = this.TokenFormGroup.value.inputAddress
-
+    
                 const provider = ethers.getDefaultProvider('rinkeby');
                 const wallet = new ethers.Wallet(this.privateKey,provider)
-
+    
                 const tx = 
                 {
                     to: toAddress,
                     gasLimit: 50000,
                     value: parsedAmount._hex,
                 }
-
+    
                 Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
                 {
                     console.log('txHash:'+ txObj.hash)
                 })
+    
+                let contractAddress = this.ims.getContractAddress()
+                let contractABI = this.ims.getContractABI()
+    
+                const contract = new ethers.Contract(contractAddress,contractABI,wallet)
 
-                // let contractAddress = this.ims.getContractAddress()
-                // let contractABI = this.ims.getContractABI()
-
-                // // const contract = new ethers.Contract(contractAddress,contractABI,wallet)
-
-                // wallet.sendTransaction(tx).then((txObj)=>
-                // {
-                //     console.log('txHash', txObj.hash)
-                // })
+                Promise.all([contract.publishTransaction(toAddress,parsedAmount,`Transfering ETH ${parsedAmount} to ${toAddress}`,'TRANSFER',
+                {gasLimit: 100000})])
+                .then(([contractTxHash])=>
+                {
+                    console.log('Contract txHash:'+JSON.stringify(contractTxHash))
+                })
 
             }
             

@@ -24,7 +24,7 @@
     <p-card header="Send">
 
 
-        <form [formGroup]="TokenFormGroup" (ngSubmit)="confirmFeeModal()">
+        <form [formGroup]="TokenFormGroup" (ngSubmit)="sendTransaction()">
 
             <div class="p-inputgroup">
                 
@@ -57,6 +57,7 @@
         
             <br>
 
+            <!-- <button #btnSend type="button" icon="pi pi-send" pButton label="Send" type="submit"></button> -->
             <button #btnSend type="button" icon="pi pi-send" pButton label="Send" type="submit" [disabled]="!TokenFormGroup.valid"></button>
 
         </form>
@@ -108,6 +109,61 @@
 </p-dialog>
 </div>
 
+<p-dialog header="Transaction review" [(visible)]="txReviewModal" [modal]="true" [style]="{width: '50vw'}" [baseZIndex]="10000"
+    [draggable]="false" [resizable]="false">
+
+    <p-card>
+
+        <p-divider align="left">
+            <div class="p-d-inline-flex p-ai-center">
+                <b>Addresses</b>
+              </div>
+        </p-divider>
+
+        <div class="flex flex-row flex-wrap card-container">
+            <div class="col-5 col-md-5">
+                <button pButton pRipple [disabled] = "disableClick == true" type="button" icon="pi pi-user" label="Sender: 0x880B0 ... 55d4459" class="p-button-rounded p-button-secondary p-button-outlined"></button>
+            </div>
+
+            <div class="col-1 col-md-1 fee-modal-arrow-right">
+                <button pButton pRipple [disabled] = "disableClick == true" type="button" icon="pi pi-arrow-right" class="p-button-rounded p-button-secondary p-button-outlined"></button>
+            </div>
+
+            <div class="col-5 col-md-5">
+                <button pButton pRipple [disabled] = "disableClick == true" type="button" icon="pi pi-user" label="Receiver: 0x880B0 ... 55d4459" class="p-button-rounded p-button-secondary p-button-outlined"></button>
+            </div>
+        </div>
+
+        <p-divider align="left">
+            <div class="p-d-inline-flex p-ai-center">
+                <b>Site name</b>
+              </div>
+        </p-divider>
+
+            <p>
+            {{txReviewModalSiteLabel}}
+            </p>
+            <button pButton pRipple type="button" label="Send Ether" [disabled] = "disableClick == true" class="p-button-outlined p-button-secondary"></button>
+            <br>
+
+            <div class="flex flex-row flex-wrap card-container">
+                <div class="eth-currency-icon">
+                    <img src="../../assets/img/ethCurrency.png" style="width: 25px; height: 25px;">
+                </div>
+
+                <div>
+                    <h2>{{txReviewAmountLabel}}</h2>
+                </div>
+            </div>
+        
+        <p-divider align="left">
+                <b>Fee structure</b>
+        </p-divider>
+
+        <p>Estimated gas fee</p>
+
+    </p-card>
+</p-dialog>
 
 
 

@@ -22,6 +22,8 @@ import { ToastModule } from 'primeng/toast';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import {BlockUIModule} from 'primeng/blockui';
 import {MessageModule} from 'primeng/message';
+import {PanelModule} from 'primeng/panel';
+import {DividerModule} from 'primeng/divider';
 
 
 @NgModule({
@@ -47,7 +49,9 @@ import {MessageModule} from 'primeng/message';
     ToastModule,
     ProgressSpinnerModule,
     BlockUIModule,
-    MessageModule
+    MessageModule,
+    PanelModule,
+    DividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
