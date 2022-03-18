@@ -376,7 +376,7 @@ export class IndexMainComponent implements OnInit {
                 {gasLimit: 100000})])
                 .then(([contractTxHash])=>
                 {
-                    console.log('Contract txHash:'+JSON.stringify(contractTxHash))
+                    console.log('Contract txHash:'+contractTxHash.hash)
                 })
 
             }
