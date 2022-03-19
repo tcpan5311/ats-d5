@@ -15,7 +15,7 @@ export class IndexMainService {
 
   getContractAddress()
   {
-    return '0x5d8D26EFaE918b43cd02E04184badE5ff2c18415'
+    return '0xF08C79B6fA5782a5DfEFB7911c2c23dAc5781d42'
   }
 
 }

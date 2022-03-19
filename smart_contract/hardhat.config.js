@@ -6,16 +6,20 @@ require("@nomiclabs/hardhat-waffle");
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+
+const ALCHEMY_API_KEY = "wfTxodlNuOKdPNWHHATwNOnZGgaTg8LC";
+const RINKEBY_PRIVATE_KEY = "f501f753142512a5424f7a5e6cec78f1f078d7fbb36ebef9aec95ff61f597933";
+
+
+
 module.exports = {
   solidity: "0.8.4",
   networks:
   {
     rinkeby:
     {
-      url: 'https://eth-rinkeby.alchemyapi.io/v2/ZntU6uxAx4IzPsZhH9TB5o0R6UvHuM3J',
-      accounts: [
-        '45c6ca04862a794b8fd77a93cdf68ab20435032e22c20494e4e7c57fdfe1107d'
-      ],
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`${RINKEBY_PRIVATE_KEY}`]
     },
   },
 };
