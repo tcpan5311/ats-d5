@@ -4,35 +4,32 @@ pragma solidity ^0.8.0;
 
         struct transaction
 	    {
-           address sender;
            address receiver;
            uint amount;
-           string message;
            string timestamp;
 	    }
         
         mapping(address => mapping(uint=>transaction)) public userTransactions;
         mapping (address => uint256) lastPosition;
-        
-        function publishTransaction(address sender, address receiver, uint amount, string memory message, string memory timestamp) public
+
+        function publishTransaction(address receiver, uint amount,string memory timestamp) public
         {
-            userTransactions[sender][lastPosition[sender]] = transaction(sender,receiver,amount,message,timestamp);
-            lastPosition[sender]++;
+            userTransactions[msg.sender][lastPosition[msg.sender]] = transaction(receiver,amount,timestamp);
+            lastPosition[msg.sender]++;
         }
 
-        function readTransaction(address sender,uint id) view public returns(address,address,uint,string memory,string memory)
+        function readTransaction(uint id) view public returns(address,uint,string memory)
         {
-            transaction memory t = userTransactions[sender][id];
-            return (t.sender,
+            transaction memory t = userTransactions[msg.sender][id];
+            return (
                     t.receiver,
                     t.amount,
-                    t.message,
                     t.timestamp);
         }
 
-        function readTransactionLength(address sender) view public returns(uint256)
+        function readTransactionLength() view public returns(uint)
         {
-            return lastPosition[sender];
+            return lastPosition[msg.sender];
         }
         
     }

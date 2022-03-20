@@ -26,7 +26,6 @@ export class IndexMainComponent implements OnInit {
   window: any;
   eth: any
   privateKey : any = ""
-  ownerAddress: any = ""
   connectButtonLabel = "Connect wallet"
   panelAddressLabel = "Wallet not connected"
   panelBalanceLabel = "Balance not available"
@@ -230,7 +229,6 @@ export class IndexMainComponent implements OnInit {
                     this.displayModal = false
     
                     this.privateKey = node.privateKey
-                    this.ownerAddress = node.address
                     this.uploadedFiles = []
                     this.accountLoaded = true
 
@@ -259,7 +257,6 @@ export class IndexMainComponent implements OnInit {
         disconnectWallet()
         {
             this.privateKey = ""
-            this.ownerAddress = ""
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
             this.panelBalanceLabel = "Balance not available"
@@ -313,7 +310,7 @@ export class IndexMainComponent implements OnInit {
                 {
                     console.log('txHash:'+ txObj.hash)
 
-                    Promise.all([contract.publishTransaction(this.ownerAddress,toAddress,parsedAmount,`Transfering ETH ${parsedAmount} to ${toAddress}`,timeStamp,
+                    Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
                     {gasLimit: 900000})])
                     .then(([contractTxHash])=>
                     {
@@ -343,7 +340,7 @@ export class IndexMainComponent implements OnInit {
                 const txs:any = []
 
 
-                Promise.all([contract.readTransactionLength(this.ownerAddress)]).then(([result])=>
+                Promise.all([contract.readTransactionLength()]).then(([result])=>
                 {
                     result = parseFloat(ethers.utils.formatEther(result))
                     result = parseInt((result * Math.pow(10,18)).toFixed())
@@ -353,23 +350,12 @@ export class IndexMainComponent implements OnInit {
                     let index = (result - 1)
                     while(index >= 0)
                     {
-                        let tx_promise = contract.readTransaction(this.ownerAddress,index)
+                        let tx_promise = contract.readTransaction(index)
                         tx_promises.push(tx_promise)
 
                         index --
                     }
 
-                    for(let index=0;index<result;index++)
-                    {
-                        
-                        
-                        // console.log(index)
-                        // Promise.all([contract.readTransaction(this.ownerAddress,index)]).then(([result])=>
-                        // {
-                        //     txs.push(result)
-                        //     console.log(result)
-                        // })
-                    }
                     Promise.all(tx_promises).then((result)=>
                     {
                         console.log(result)
