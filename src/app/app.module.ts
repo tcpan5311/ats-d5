@@ -24,6 +24,7 @@ import {BlockUIModule} from 'primeng/blockui';
 import {MessageModule} from 'primeng/message';
 import {PanelModule} from 'primeng/panel';
 import {DividerModule} from 'primeng/divider';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import {DividerModule} from 'primeng/divider';
     BlockUIModule,
     MessageModule,
     PanelModule,
-    DividerModule
+    DividerModule,
+    ScrollPanelModule
   ],
   providers: [],
   bootstrap: [AppComponent]

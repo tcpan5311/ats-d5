@@ -25,7 +25,10 @@ export class IndexMainComponent implements OnInit {
   txReviewModal: any
   window: any;
   eth: any
+
+  ownerAddress: any = ""
   privateKey : any = ""
+
   connectButtonLabel = "Connect wallet"
   panelAddressLabel = "Wallet not connected"
   panelBalanceLabel = "Balance not available"
@@ -46,6 +49,8 @@ export class IndexMainComponent implements OnInit {
   disableClick: any = true
   txReviewModalSiteLabel: string = window.location.href
   txReviewAmountLabel: string = ""
+
+  txs:any = []
 
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService) { }
@@ -213,8 +218,8 @@ export class IndexMainComponent implements OnInit {
                     
                     const node = hdnode.derivePath(walletPath.standard);
                     
-                    this.connectButtonLabel = (`${node.address.slice(0, 7)} ... ${node.address.slice(35)}`)
-                    this.panelAddressLabel = (`${node.address.slice(0, 7)} ... ${node.address.slice(35)}`)
+                    this.connectButtonLabel = this.slicedAddress(node.address)
+                    this.panelAddressLabel = this.slicedAddress(node.address)
 
                     const provider = ethers.getDefaultProvider('rinkeby')
                     provider.getBalance(node.address).then((balance) => 
@@ -229,9 +234,9 @@ export class IndexMainComponent implements OnInit {
                     this.displayModal = false
     
                     this.privateKey = node.privateKey
+                    this.ownerAddress = node.address
                     this.uploadedFiles = []
                     this.accountLoaded = true
-
                     this.returnTransaction()
 
                 }
@@ -257,11 +262,12 @@ export class IndexMainComponent implements OnInit {
         disconnectWallet()
         {
             this.privateKey = ""
+            this.ownerAddress = ""
+            this.txs = []
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
             this.panelBalanceLabel = "Balance not available"
             this.accountLoaded = false
-            this.cdr.detectChanges()
             this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
         }       
 
@@ -337,7 +343,6 @@ export class IndexMainComponent implements OnInit {
                 let contractABI = this.ims.getContractABI()
                 const wallet = new ethers.Wallet(this.privateKey,provider)
                 const contract = new ethers.Contract(contractAddress,contractABI,wallet)
-                const txs:any = []
 
 
                 Promise.all([contract.readTransactionLength()]).then(([result])=>
@@ -358,14 +363,27 @@ export class IndexMainComponent implements OnInit {
 
                     Promise.all(tx_promises).then((result)=>
                     {
-                        console.log(result)
-                    });
+                        this.txs = result.map((element, index) => {
 
+                            return {
+                              fromAddress: this.slicedAddress(this.ownerAddress),
+                              toAddress: this.slicedAddress(element[0]),
+                              amount: ethers.utils.formatEther(element[1]),
+                              timestamp: element[2]
+                            }
+                          });
+                        this.cdr.detectChanges()
+                    });
 
                 })
                 
             }
            
+        }
+
+        slicedAddress(value:string)
+        {
+            return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
         }
 
         

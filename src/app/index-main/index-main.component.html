@@ -20,7 +20,7 @@
 <div class="col-2 col-md-2">
 </div>
 
-<div class = "col-6 col-md-6  main-form">
+<div class = "col-5 col-md-5  main-form">
     <p-card header="Send">
 
 
@@ -66,7 +66,7 @@
     </p-card>
 </div>
 
-<div class="col-1 col-md-1">
+<div class="col-2 col-md-2">
 </div>
 
 
@@ -76,6 +76,36 @@
         <p-button icon="pi pi-times" *ngIf= "accountLoaded == true" (click)="disconnectWallet()" label="Disconnect wallet" class="p-button-text"></p-button>
     </p-card>
 </div>
+
+<div class="col-8 col-md-8">
+</div>
+
+<div class = "col-4 col-md-4">
+    <p-panel header="Transaction history">
+
+        <p-scrollPanel [style]="{height: '200px'}">
+
+        <p *ngIf="txs.length == 0 && accountLoaded == false">
+            Transaction not available, please connect to your wallet
+        </p>
+        
+        <p *ngIf="txs.length == 0 && accountLoaded == true">
+            There are no transaction
+        </p>
+
+         <p *ngFor="let tx of txs;">
+           From: {{tx.fromAddress}}<br>
+           To: {{tx.toAddress}}<br>
+           Amount: {{tx.amount}} Ether<br>
+           Timestamp: {{tx.timestamp}}<br>
+           <p-divider></p-divider>
+          </p>
+
+          </p-scrollPanel>
+
+    </p-panel>
+</div>
+   
 
 </div>
 
