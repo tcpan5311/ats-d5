@@ -9,7 +9,6 @@ import { AbstractControl } from '@angular/forms';
 
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { IndexMainService } from './index-main.service';
-import { timeStamp } from 'console';
 
 @Component({
   selector: 'app-index-main',
@@ -221,16 +220,6 @@ export class IndexMainComponent implements OnInit {
                     this.connectButtonLabel = this.slicedAddress(node.address)
                     this.panelAddressLabel = this.slicedAddress(node.address)
 
-                    const provider = ethers.getDefaultProvider('rinkeby')
-                    provider.getBalance(node.address).then((balance) => 
-                    {
-                        let balanceInEth = parseFloat(ethers.utils.formatEther(balance))
-                        balanceInEth = Math.round(balanceInEth * 10000 + Number.EPSILON)/10000
-
-                        this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
-                        this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
-                    })
-
                     this.displayModal = false
     
                     this.privateKey = node.privateKey
@@ -238,6 +227,7 @@ export class IndexMainComponent implements OnInit {
                     this.uploadedFiles = []
                     this.accountLoaded = true
                     this.returnTransaction()
+                    this.readBalance()
 
                 }
     
@@ -259,17 +249,19 @@ export class IndexMainComponent implements OnInit {
             
         }
 
-        disconnectWallet()
+        readBalance()
         {
-            this.privateKey = ""
-            this.ownerAddress = ""
-            this.txs = []
-            this.connectButtonLabel = "Connect wallet"
-            this.panelAddressLabel = "Wallet not connected"
-            this.panelBalanceLabel = "Balance not available"
-            this.accountLoaded = false
-            this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
-        }       
+            const provider = ethers.getDefaultProvider('rinkeby')
+
+                provider.getBalance(this.ownerAddress).then((balance) => 
+                {
+                    let balanceInEth = parseFloat(ethers.utils.formatEther(balance))
+                    balanceInEth = Math.round(balanceInEth * 10000 + Number.EPSILON)/10000
+
+                    this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
+                    this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
+                })
+        }
 
         confirmFeeModal()
         {
@@ -321,6 +313,10 @@ export class IndexMainComponent implements OnInit {
                     .then(([contractTxHash])=>
                     {
                         console.log('Contract txHash:'+contractTxHash.hash)
+                        this.TokenFormGroup.reset()
+                        this.returnTransaction()
+                        this.readBalance()
+                        this.cdr.detectChanges()
                     })
                 })
                 
@@ -380,6 +376,20 @@ export class IndexMainComponent implements OnInit {
             }
            
         }
+
+        disconnectWallet()
+        {
+            this.uploadedFiles = []
+            this.privateKey = ""
+            this.ownerAddress = ""
+            this.txs = []
+            this.connectButtonLabel = "Connect wallet"
+            this.panelAddressLabel = "Wallet not connected"
+            this.panelBalanceLabel = "Balance not available"
+            this.accountLoaded = false
+            this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
+            this.cdr.detectChanges()
+        }       
 
         slicedAddress(value:string)
         {
