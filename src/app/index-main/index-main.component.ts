@@ -228,7 +228,7 @@ export class IndexMainComponent implements OnInit {
                     this.accountLoaded = true
                     this.returnTransaction()
                     this.readBalance()
-
+                    this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
                 }
     
                 catch(error)
@@ -259,7 +259,6 @@ export class IndexMainComponent implements OnInit {
                     balanceInEth = Math.round(balanceInEth * 10000 + Number.EPSILON)/10000
 
                     this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
-                    this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
                 })
         }
 
