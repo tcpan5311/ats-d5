@@ -9,6 +9,7 @@ import { AbstractControl } from '@angular/forms';
 
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { IndexMainService } from './index-main.service';
+import { AuthService } from '../shared/auth.service';
 
 @Component({
   selector: 'app-index-main',
@@ -24,9 +25,6 @@ export class IndexMainComponent implements OnInit {
   txReviewModal: any
   window: any;
   eth: any
-
-  ownerAddress: any = ""
-  privateKey : any = ""
 
   connectButtonLabel = "Connect wallet"
   panelAddressLabel = "Wallet not connected"
@@ -52,12 +50,15 @@ export class IndexMainComponent implements OnInit {
   txs:any = []
 
 
-  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService) { }
+  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
+  private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService) { }
 
   ngOnInit(): void {
-
-    console.log(this.ims.getContractABI())
-    console.log(this.ims.getContractAddress())
+    
+    this.accountLoaded = false
+    this.connectedToWallet()
+    // console.log(this.ims.getContractABI())
+    // console.log(this.ims.getContractAddress())
 
     let amount_regex = "^[0-9]*(\.[0-9]{0,2})?$"
 
@@ -179,6 +180,8 @@ export class IndexMainComponent implements OnInit {
                 {
                     console.log(fileReader.result);
                     this.decryptFromPhase(fileReader.result)
+                    
+                    
                 }
 
                 else
@@ -201,7 +204,7 @@ export class IndexMainComponent implements OnInit {
     
         decryptFromPhase(mnemonic: any)
         {
-            if(this.accountLoaded == false)
+            if(this.as.getToken() == undefined)
             {
                 let walletPath = {
                     "standard": "m/44'/60'/0'/0/0", 
@@ -214,26 +217,17 @@ export class IndexMainComponent implements OnInit {
                 {
                     //mnemonic phase = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
                     const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-                    
                     const node = hdnode.derivePath(walletPath.standard);
-                    
-                    this.connectButtonLabel = this.slicedAddress(node.address)
-                    this.panelAddressLabel = this.slicedAddress(node.address)
-
-                    this.displayModal = false
-    
-                    this.privateKey = node.privateKey
-                    this.ownerAddress = node.address
+                    this.as.saveToken(node)
+                    this.connectedToWallet()
                     this.uploadedFiles = []
-                    this.accountLoaded = true
-                    this.returnTransaction()
-                    this.readBalance()
+                    this.displayModal = false
                     this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
                 }
     
                 catch(error)
                 {
-    
+                    console.log(error)
                     this.modal_msg = [
                         {severity: 'error', summary: 'Error', detail: 'Invalid mnemonic phase provided'}
                     ];
@@ -249,17 +243,42 @@ export class IndexMainComponent implements OnInit {
             
         }
 
+        connectedToWallet()
+        {
+            if(this.as.getToken() != undefined)
+            {
+                const n = this.as.getToken()
+                this.connectButtonLabel = this.slicedAddress(n.address)
+                this.panelAddressLabel = this.slicedAddress(n.address)
+                this.accountLoaded = true
+                this.readBalance()
+                this.returnTransaction()
+            }
+
+            else
+            {
+                this.accountLoaded = false
+            }
+            
+        }
+
         readBalance()
         {
-            const provider = ethers.getDefaultProvider('rinkeby')
+            if(this.accountLoaded == true)
+            {
+                this.panelBalanceLabel = "Loading..."
+                const provider = ethers.getDefaultProvider('rinkeby')
 
-                provider.getBalance(this.ownerAddress).then((balance) => 
+                provider.getBalance(this.as.getToken().address).then((balance) => 
                 {
                     let balanceInEth = parseFloat(ethers.utils.formatEther(balance))
                     balanceInEth = Math.round(balanceInEth * 10000 + Number.EPSILON)/10000
 
                     this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
+                    this.cdr.detectChanges()
                 })
+            }
+            
         }
 
         confirmFeeModal()
@@ -272,19 +291,13 @@ export class IndexMainComponent implements OnInit {
 
         sendTransaction()
         {
-
-            if(this.accountLoaded == false)
-            {
-                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
-            }
-
-            else
+            if(this.accountLoaded == true)
             {
                 //Initialize wallet and contract
                 const provider = ethers.getDefaultProvider('rinkeby');
                 const contractAddress = this.ims.getContractAddress()
                 const contractABI = this.ims.getContractABI()
-                const wallet = new ethers.Wallet(this.privateKey,provider)
+                const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
                 const contract = new ethers.Contract(contractAddress,contractABI,wallet)
 
                 const toAmount = this.TokenFormGroup.value.inputAmount
@@ -313,30 +326,31 @@ export class IndexMainComponent implements OnInit {
                     {
                         console.log('Contract txHash:'+contractTxHash.hash)
                         this.TokenFormGroup.reset()
-                        this.returnTransaction()
-                        this.readBalance()
+                        this.connectedToWallet()
                         this.cdr.detectChanges()
                     })
                 })
-                
-            }
-            
-        }
-
-        returnTransaction()
-        {
-            if(this.accountLoaded == false)
-            {
-                console.log("No data")
             }
 
             else
             {
+                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
+            }
+                
+        }
+            
+
+        returnTransaction()
+        {
+
+            if(this.accountLoaded == true)
+            {
+                console.log("This is return transaction")
                 //Initialize wallet and contract
                 const provider = ethers.getDefaultProvider('rinkeby');
                 let contractAddress = this.ims.getContractAddress()
                 let contractABI = this.ims.getContractABI()
-                const wallet = new ethers.Wallet(this.privateKey,provider)
+                const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
                 const contract = new ethers.Contract(contractAddress,contractABI,wallet)
 
 
@@ -361,7 +375,7 @@ export class IndexMainComponent implements OnInit {
                         this.txs = result.map((element, index) => {
 
                             return {
-                              fromAddress: this.slicedAddress(this.ownerAddress),
+                              fromAddress: this.slicedAddress(this.as.getToken().address),
                               toAddress: this.slicedAddress(element[0]),
                               amount: ethers.utils.formatEther(element[1]),
                               timestamp: element[2]
@@ -371,22 +385,20 @@ export class IndexMainComponent implements OnInit {
                     });
 
                 })
-                
             }
-           
+     
         }
 
         disconnectWallet()
         {
+            sessionStorage.removeItem('key')
+            this.connectedToWallet()
             this.uploadedFiles = []
-            this.privateKey = ""
-            this.ownerAddress = ""
             this.txs = []
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
             this.panelBalanceLabel = "Balance not available"
-            this.accountLoaded = false
-            this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet disconnected'});
+            this.MessageService.add({key: 't1', severity:'info', summary: 'Info', detail: 'Wallet disconnected'});
             this.cdr.detectChanges()
         }       
 
@@ -395,7 +407,11 @@ export class IndexMainComponent implements OnInit {
             return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
         }
 
-        
+        // setKey()
+        // {
+        //   console.log(this.as.getToken())
+        // }
+
         // decrypytPrivateKey()
         // {
         //    let keystore = 

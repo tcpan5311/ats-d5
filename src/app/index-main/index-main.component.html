@@ -86,7 +86,7 @@
         <p-scrollPanel [style]="{height: '200px'}">
 
         <p *ngIf="txs.length == 0 && accountLoaded == false">
-            Transaction not available, please connect to your wallet
+            Transaction not available when wallet is not connected
         </p>
         
         <p *ngIf="txs.length == 0 && accountLoaded == true">
@@ -105,6 +105,8 @@
 
     </p-panel>
 </div>
+
+<p-button (click)="returnTransaction()" label="Test" class="p-button-text"></p-button>
    
 
 </div>

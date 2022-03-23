@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { HostListener, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -55,7 +55,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
     DividerModule,
     ScrollPanelModule
   ],
-  providers: [],
+  providers: [HostListener],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

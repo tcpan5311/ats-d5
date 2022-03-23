@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,10 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'angular-token-sender';
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadHandler(event: Event) 
+  {
+    localStorage.removeItem('data')
+  }
 }

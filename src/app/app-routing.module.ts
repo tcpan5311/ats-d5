@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { IndexMainComponent } from './index-main/index-main.component';
+import { AuthGuard } from "./shared/auth.guard";
 
 const routes: Routes = [
-  {path:'index',component:IndexMainComponent}
+  {path:'index',component:IndexMainComponent
+  // ,canActivate:[AuthGuard]
+}
 ];
 
 @NgModule({
