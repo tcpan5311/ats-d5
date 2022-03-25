@@ -11,11 +11,13 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { IndexMainService } from './index-main.service';
 import { AuthService } from '../shared/auth.service';
 
+import {DialogService} from 'primeng/dynamicdialog';
+
 @Component({
   selector: 'app-index-main',
   templateUrl: './index-main.component.html',
   styleUrls: ['./index-main.component.scss'],
-  providers: [MessageService]
+  providers: [DialogService,MessageService]
 })
 export class IndexMainComponent implements OnInit {
 
@@ -23,12 +25,16 @@ export class IndexMainComponent implements OnInit {
   items !: MenuItem[];
   displayModal:any
   txReviewModal: any
+  txAdjustFeeModal: any  
+
   window: any;
   eth: any
 
   connectButtonLabel = "Connect wallet"
   panelAddressLabel = "Wallet not connected"
   panelBalanceLabel = "Balance not available"
+  transactionReviewSenderLabel = ""
+  transactionReviewReceiverLabel = ""
 
   accountLoaded = false
 
@@ -48,15 +54,20 @@ export class IndexMainComponent implements OnInit {
   txReviewAmountLabel: string = ""
 
   txs:any = []
-
+  priorityRanges: any = [{name: 'Low', key: 'L'}, 
+  {name: 'Medium', key: 'M'}, {name: 'High', key: 'H'}]
+  selectedPriorityRanges: any = []
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
-  private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService) { }
+  private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
+  public DialogService:DialogService) { }
 
   ngOnInit(): void {
     
     this.accountLoaded = false
     this.connectedToWallet()
+    this.txReviewAmountLabel = "Not available"
+    this.selectedPriorityRanges = this.priorityRanges[1]
     // console.log(this.ims.getContractABI())
     // console.log(this.ims.getContractAddress())
 
@@ -250,6 +261,7 @@ export class IndexMainComponent implements OnInit {
                 const n = this.as.getToken()
                 this.connectButtonLabel = this.slicedAddress(n.address)
                 this.panelAddressLabel = this.slicedAddress(n.address)
+                this.transactionReviewSenderLabel = this.slicedAddress(n.address)
                 this.accountLoaded = true
                 this.readBalance()
                 this.returnTransaction()
@@ -283,10 +295,18 @@ export class IndexMainComponent implements OnInit {
 
         confirmFeeModal()
         {
-            
             this.txReviewModal = true
-            this.txReviewAmountLabel = this.TokenFormGroup.value.inputAmount
+            if(this.TokenFormGroup.value.inputAmount && this.TokenFormGroup.value.inputAddress != "")
+            {
+                this.txReviewAmountLabel = this.TokenFormGroup.value.inputAmount
+                this.transactionReviewReceiverLabel = this.slicedAddress(this.TokenFormGroup.value.inputAddress)
+            }
             
+        }
+
+        launchAdjustFeeModal()
+        {
+            this.txAdjustFeeModal =  true
         }
 
         sendTransaction()
@@ -397,6 +417,8 @@ export class IndexMainComponent implements OnInit {
             this.txs = []
             this.connectButtonLabel = "Connect wallet"
             this.panelAddressLabel = "Wallet not connected"
+            this.transactionReviewSenderLabel = ""
+            this.transactionReviewReceiverLabel = ""
             this.panelBalanceLabel = "Balance not available"
             this.MessageService.add({key: 't1', severity:'info', summary: 'Info', detail: 'Wallet disconnected'});
             this.cdr.detectChanges()

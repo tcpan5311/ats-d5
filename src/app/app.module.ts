@@ -25,6 +25,10 @@ import {MessageModule} from 'primeng/message';
 import {PanelModule} from 'primeng/panel';
 import {DividerModule} from 'primeng/divider';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
+import {FieldsetModule} from 'primeng/fieldset';
+import { DynamicDialogModule } from 'primeng/dynamicdialog';
+import { TimelineModule } from "primeng/timeline";
+import {RadioButtonModule} from 'primeng/radiobutton';
 
 
 @NgModule({
@@ -53,7 +57,11 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
     MessageModule,
     PanelModule,
     DividerModule,
-    ScrollPanelModule
+    ScrollPanelModule,
+    FieldsetModule,
+    DynamicDialogModule,
+    TimelineModule,
+    RadioButtonModule
   ],
   providers: [HostListener],
   bootstrap: [AppComponent]
