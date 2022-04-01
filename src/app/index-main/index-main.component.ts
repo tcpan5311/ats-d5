@@ -12,6 +12,7 @@ import { IndexMainService } from './index-main.service';
 import { AuthService } from '../shared/auth.service';
 
 import {DialogService} from 'primeng/dynamicdialog';
+import { interval, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-index-main',
@@ -58,12 +59,29 @@ export class IndexMainComponent implements OnInit {
   {name: 'Medium', key: 'M'}, {name: 'High', key: 'H'}]
   selectedPriorityRanges: any = []
 
+//   subscription: Subscription
+
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
-  public DialogService:DialogService) { }
+  public DialogService:DialogService) 
+  {
+    // this.subscription= interval(10000).subscribe((x =>{
+    //     this.ims.getGasFee().then((result) =>
+    //     {
+    //     let data = JSON.stringify(result)
+    //     console.log(data)
+    //     })
+    // }));
+  }
 
   ngOnInit(): void {
-    
+
+        this.ims.getGasFee().then((result) =>
+        {
+            let data: any =  result
+            console.log(data.low)
+        })
+
     this.accountLoaded = false
     this.connectedToWallet()
     this.txReviewAmountLabel = "Not available"
@@ -328,7 +346,8 @@ export class IndexMainComponent implements OnInit {
                                 +(currentTime.getMonth()+1).toLocaleString()+"-"
                                 +currentTime.getFullYear()+" "
                                 +currentTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-
+                                
+                //gasPrice: 
                 const tx = 
                 {
                     to: toAddress,
