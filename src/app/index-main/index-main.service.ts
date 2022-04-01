@@ -30,7 +30,23 @@ export class IndexMainService {
 
       Promise.all([this.response]).then(([r])=>{
 
-        resolve(r)
+        const gasLimit = 21000
+        const lowGasPricePerUnit = r.low
+        const avgGasPricePerUnit = r.average
+        const highGasPricePerUnit = r.high
+
+        const totalLowGas = (gasLimit + (gasLimit*lowGasPricePerUnit)) * 10 ** -9 
+        const totalAvgGas = (gasLimit + (gasLimit*avgGasPricePerUnit)) * 10 ** -9 
+        const totalHighGas = (gasLimit + (gasLimit*highGasPricePerUnit)) * 10 ** -9 
+
+        const gasFees = 
+        {
+            low: totalLowGas,
+            avg:totalAvgGas,
+            high:totalHighGas
+        }
+
+        resolve(gasFees)
 
       }).catch(function(err)
       {

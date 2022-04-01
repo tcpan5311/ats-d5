@@ -59,28 +59,34 @@ export class IndexMainComponent implements OnInit {
   {name: 'Medium', key: 'M'}, {name: 'High', key: 'H'}]
   selectedPriorityRanges: any = []
 
-//   subscription: Subscription
+  subscription: Subscription
+  averageGasFeeModalLabel: any = ""
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
   public DialogService:DialogService) 
   {
-    // this.subscription= interval(10000).subscribe((x =>{
-    //     this.ims.getGasFee().then((result) =>
-    //     {
-    //     let data = JSON.stringify(result)
-    //     console.log(data)
-    //     })
-    // }));
+    this.subscription= interval(10000).subscribe((x =>{
+        this.ims.getGasFee().then((gas) =>
+        {
+            console.log(gas)
+            let g: any = {}
+            g = gas        
+            this.averageGasFeeModalLabel = g.avg
+            this.cdr.detectChanges()
+        })
+    }));
   }
 
   ngOnInit(): void {
 
-        this.ims.getGasFee().then((result) =>
-        {
-            let data: any =  result
-            console.log(data.low)
-        })
+    this.ims.getGasFee().then((gas) =>
+    {
+        console.log(gas)
+        let g: any = {}
+        g = gas        
+        this.averageGasFeeModalLabel = g.avg
+    })
 
     this.accountLoaded = false
     this.connectedToWallet()
