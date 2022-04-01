@@ -58,24 +58,37 @@ export class IndexMainComponent implements OnInit {
   priorityRanges: any = [{name: 'Low', key: 'L'}, 
   {name: 'Medium', key: 'M'}, {name: 'High', key: 'H'}]
   selectedPriorityRanges: any = []
-
-  subscription: Subscription
   averageGasFeeModalLabel: any = ""
+
+//   subscription: Subscription
+  interval
+  timeLeft: number = 10;
+
+
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
   public DialogService:DialogService) 
-  {
-    this.subscription= interval(10000).subscribe((x =>{
-        this.ims.getGasFee().then((gas) =>
+  {    
+    this.interval = setInterval(() => {
+        if(this.timeLeft > 0) 
         {
-            console.log(gas)
-            let g: any = {}
-            g = gas        
-            this.averageGasFeeModalLabel = g.avg
-            this.cdr.detectChanges()
-        })
-    }));
+          console.log(this.timeLeft)  
+          this.timeLeft--;
+        } 
+        else if(this.timeLeft === 0)
+        {
+            this.ims.getGasFee().then((gas) =>
+            {
+                console.log(gas)
+                let g: any = {}
+                g = gas        
+                this.averageGasFeeModalLabel = g.avg
+                this.cdr.detectChanges()
+                this.timeLeft = 10;
+            })  
+        }
+      },1000)
   }
 
   ngOnInit(): void {

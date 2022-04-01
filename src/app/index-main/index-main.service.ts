@@ -31,13 +31,18 @@ export class IndexMainService {
       Promise.all([this.response]).then(([r])=>{
 
         const gasLimit = 21000
-        const lowGasPricePerUnit = r.low
-        const avgGasPricePerUnit = r.average
-        const highGasPricePerUnit = r.high
+        const lowGasPricePerUnit = parseFloat(r.low)
+        const avgGasPricePerUnit = parseFloat(r.average)
+        const highGasPricePerUnit = parseFloat(r.high)
 
-        const totalLowGas = (gasLimit + (gasLimit*lowGasPricePerUnit)) * 10 ** -9 
-        const totalAvgGas = (gasLimit + (gasLimit*avgGasPricePerUnit)) * 10 ** -9 
-        const totalHighGas = (gasLimit + (gasLimit*highGasPricePerUnit)) * 10 ** -9 
+        let totalLowGas = (gasLimit + (gasLimit*lowGasPricePerUnit)) * 10 ** -9 
+        totalLowGas =  Math.round(totalLowGas * 10000 + Number.EPSILON)/10000
+        
+        let totalAvgGas = (gasLimit + (gasLimit*avgGasPricePerUnit)) * 10 ** -9 
+        totalAvgGas = Math.round(totalAvgGas * 10000 + Number.EPSILON)/10000
+
+        let totalHighGas = (gasLimit + (gasLimit*highGasPricePerUnit)) * 10 ** -9 
+        totalHighGas = Math.round(totalHighGas * 10000 + Number.EPSILON)/10000
 
         const gasFees = 
         {

@@ -183,8 +183,10 @@
 
         <p-fieldset legend="Fee structure" [toggleable]="true">
 
-        <div class="flex justify-content-end flex-wrap card-container">
-            <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded p-button-secondary" label="Edit"
+        <div class="flex justify-content-between flex-wrap card-container">
+            <p class="flex align-items-center justify-content-center">Next update in {{timeLeft}}s</p>
+            <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded p-button-secondary
+            flex align-items-center justify-content-center" label="Edit"
             (click)="launchAdjustFeeModal()"></button>
         </div>
 
@@ -262,6 +264,5 @@
     </div>
    
 </p-dialog>
-
 
 
