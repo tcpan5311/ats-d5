@@ -12,7 +12,8 @@ import { IndexMainService } from './index-main.service';
 import { AuthService } from '../shared/auth.service';
 
 import {DialogService} from 'primeng/dynamicdialog';
-import { interval, Subscription} from 'rxjs';
+import { interval, Subscription,timer} from 'rxjs';
+import { map, take } from 'rxjs/operators'
 
 @Component({
   selector: 'app-index-main',
@@ -60,9 +61,9 @@ export class IndexMainComponent implements OnInit {
   selectedPriorityRanges: any = []
   averageGasFeeModalLabel: any = ""
 
-//   subscription: Subscription
-  interval
+//   interval
   timeLeft: number = 10;
+  subscription: any =  Subscription;
 
 
 
@@ -70,43 +71,18 @@ export class IndexMainComponent implements OnInit {
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
   public DialogService:DialogService) 
   {    
-    this.interval = setInterval(() => {
-        if(this.timeLeft > 0) 
-        {
-          console.log(this.timeLeft)  
-          this.timeLeft--;
-        } 
-        else if(this.timeLeft === 0)
-        {
-            this.ims.getGasFee().then((gas) =>
-            {
-                console.log(gas)
-                let g: any = {}
-                g = gas        
-                this.averageGasFeeModalLabel = g.avg
-                this.cdr.detectChanges()
-                this.timeLeft = 10;
-            })  
-        }
-      },1000)
+        
   }
 
   ngOnInit(): void {
 
-    this.ims.getGasFee().then((gas) =>
-    {
-        console.log(gas)
-        let g: any = {}
-        g = gas        
-        this.averageGasFeeModalLabel = g.avg
-    })
+    this.getInitialGasFee()
+    this.startTimer()
 
     this.accountLoaded = false
     this.connectedToWallet()
     this.txReviewAmountLabel = "Not available"
     this.selectedPriorityRanges = this.priorityRanges[1]
-    // console.log(this.ims.getContractABI())
-    // console.log(this.ims.getContractAddress())
 
     let amount_regex = "^[0-9]*(\.[0-9]{0,2})?$"
 
@@ -467,6 +443,48 @@ export class IndexMainComponent implements OnInit {
             return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
         }
 
+        getInitialGasFee = () => new Promise((resolve,reject) =>
+        {
+            this.ims.getGasFee().then((gas:any = {}) =>
+            {   
+                resolve(gas.avg)
+                this.averageGasFeeModalLabel = gas.avg
+            })  
+        })
+
+        // setGasFee = () => Promise.all([this.getGasFee()])
+        // .then((gas:any ={}) =>
+        // {
+        //     this.averageGasFeeModalLabel = gas
+        //     this.cdr.detectChanges()
+        // })
+
+        startTimer()
+        {
+            const length = 11
+            
+            interval(1000).pipe(take(length), map(count => length - count)).subscribe(seconds => {
+
+                this.timeLeft = (seconds - 1)
+                
+                 if(seconds == 1)
+                 {
+                    new Promise((resolve,reject) =>
+                    {
+                        this.ims.getGasFee().then((gas:any = {}) =>
+                        {   
+                            resolve(gas.avg)
+                            this.averageGasFeeModalLabel = gas.avg
+                            console.log(gas.avg)
+                            this.startTimer()
+
+                        })  
+                    })
+                 }
+
+              })
+        }
+
         // setKey()
         // {
         //   console.log(this.as.getToken())
@@ -502,6 +520,6 @@ export class IndexMainComponent implements OnInit {
         // }
 
         
-
-  }
+    
+    }
 
