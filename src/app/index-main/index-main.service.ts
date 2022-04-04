@@ -36,13 +36,13 @@ export class IndexMainService {
         const highGasPricePerUnit = parseFloat(r.high)
 
         let totalLowGas = (gasLimit + (gasLimit*lowGasPricePerUnit)) * 10 ** -9 
-        totalLowGas =  Math.round(totalLowGas * 10000 + Number.EPSILON)/10000
+        totalLowGas =  Math.round(totalLowGas * 1000000 + Number.EPSILON)/1000000
         
         let totalAvgGas = (gasLimit + (gasLimit*avgGasPricePerUnit)) * 10 ** -9 
-        totalAvgGas = Math.round(totalAvgGas * 10000 + Number.EPSILON)/10000
+        totalAvgGas = Math.round(totalAvgGas * 1000000 + Number.EPSILON)/1000000
 
         let totalHighGas = (gasLimit + (gasLimit*highGasPricePerUnit)) * 10 ** -9 
-        totalHighGas = Math.round(totalHighGas * 10000 + Number.EPSILON)/10000
+        totalHighGas = Math.round(totalHighGas * 1000000 + Number.EPSILON)/1000000
 
         const gasFees = 
         {

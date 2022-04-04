@@ -204,13 +204,13 @@
                 <div class="flex flex-column card-container">
 
                     <p class="flex align-items-center">Site estimation:</p>
-                    <p class="flex align-items-center">Completed in &lt;30 seconds</p>
+                    <p class="flex align-items-center">{{averageGasDescriptionModalLabel}}</p>
 
                 </div>
                 
             </div>
                    
-                <b><p class="flex align-items-center justify-content-center">Max fee: 0.0022018 ETH</p></b>
+                <!-- <b><p class="flex align-items-center justify-content-center">Max fee: {{maxGasFeeModalLabel}} ETH</p></b> -->
  
         </div>
 
@@ -242,15 +242,17 @@
 
     <div class="flex flex-column card-container">
 
-        <h2 class="flex align-items-center justify-content-center"><b>0.00217683 ETH</b></h2>
-        <p class="flex align-items-center justify-content-center"><b>Max fee:</b>
-        (0.00251514 ETH)</p>
-         <p class="flex align-items-center justify-content-center">Completed in &lt;30 seconds</p> 
+        <p class="flex align-items-center justify-content-center">Next update in {{timeLeft}}s</p>
+        <h2 class="flex align-items-center justify-content-center"><b>{{editGasFeeModalLabel}} ETH</b></h2>
+        <!-- <p class="flex align-items-center justify-content-center"><b>Max fee:</b>
+        (0.00251514 ETH)</p> -->
+         <p class="flex align-items-center justify-content-center">{{editGasDescriptionModalLabel}}</p> 
          <br>
 
          <div class="flex justify-content-around flex-wrap card-container">
             <div *ngFor="let pr of priorityRanges" class="p-field-checkbox flex align-items-center justify-content-center">
-                <p-radioButton [inputId]="pr.key" name="pr" [value]="pr" [(ngModel)]="selectedPriorityRanges"></p-radioButton>
+                <p-radioButton [inputId]="pr.key" name="pr" [value]="pr" [(ngModel)]="selectedPriorityRanges"
+                (click)="editFeePriority()"></p-radioButton>
                 <label [for]="pr.key">{{pr.name}}</label>
             </div>
          </div>
@@ -259,7 +261,7 @@
             
         <p-divider></p-divider>
 
-        <button pButton pRipple type="button" label="Save" class="p-button-rounded"></button>
+        <button pButton pRipple type="button" label="Save" class="p-button-rounded" (click)="saveFeePriority()"></button>
 
     </div>
    

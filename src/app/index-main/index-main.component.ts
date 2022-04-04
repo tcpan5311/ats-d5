@@ -56,16 +56,22 @@ export class IndexMainComponent implements OnInit {
   txReviewAmountLabel: string = ""
 
   txs:any = []
-  priorityRanges: any = [{name: 'Low', key: 'L'}, 
-  {name: 'Medium', key: 'M'}, {name: 'High', key: 'H'}]
-  selectedPriorityRanges: any = []
+
+  //View fee modal variables
+  priorityRanges: any = []
+  selectedPriorityRanges: any
+  finalizedPriorityRanges: any
   averageGasFeeModalLabel: any = ""
+  averageGasDescriptionModalLabel: any = ""
+
+  //Edit fee modal variables
+  editGasFeeModalLabel: any = ""
+  editGasDescriptionModalLabel: any = ""
 
 //   interval
+  intervalSubscription: any = Subscription
   timeLeft: number = 10;
   subscription: any =  Subscription;
-
-
 
   constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
@@ -75,9 +81,9 @@ export class IndexMainComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    
     this.getInitialGasFee()
-    this.startTimer()
+    this.getRealTimeGasFee()
 
     this.accountLoaded = false
     this.connectedToWallet()
@@ -447,22 +453,81 @@ export class IndexMainComponent implements OnInit {
         {
             this.ims.getGasFee().then((gas:any = {}) =>
             {   
-                resolve(gas.avg)
-                this.averageGasFeeModalLabel = gas.avg
+                resolve(gas)
+
+                if(this.finalizedPriorityRanges == undefined)
+                {
+                    this.priorityRanges = 
+                    [
+                        {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                        {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                        {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                    ]
+                    this.selectedPriorityRanges = this.priorityRanges[1]
+
+                    this.averageGasFeeModalLabel = gas.avg
+                    this.editGasFeeModalLabel = gas.avg
+                    this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                }
+
+                else if(this.finalizedPriorityRanges.name == 'Low')
+                {
+                    this.priorityRanges = 
+                    [
+                        {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                        {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                        {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                    ]
+                    this.selectedPriorityRanges = this.priorityRanges[0]
+
+                    this.averageGasFeeModalLabel = gas.low
+                    this.editGasFeeModalLabel = gas.low
+                    this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                    this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                }
+
+                else if(this.finalizedPriorityRanges.name == 'Medium')
+                {
+                    this.priorityRanges = 
+                    [
+                        {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                        {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                        {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                    ]
+                    this.selectedPriorityRanges = this.priorityRanges[1]
+
+                    this.averageGasFeeModalLabel = gas.avg
+                    this.editGasFeeModalLabel = gas.avg
+                    this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                }
+
+                else if(this.finalizedPriorityRanges.name == 'High')
+                {
+                    this.priorityRanges = 
+                    [
+                        {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                        {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                        {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                    ]
+                    this.selectedPriorityRanges = this.priorityRanges[2]
+
+                    this.averageGasFeeModalLabel = gas.high
+                    this.editGasFeeModalLabel = gas.high
+                    this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
+                    this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
+                }
+
+                // this.selectedPriorityRanges = this.priorityRanges[1]
             })  
         })
 
-        // setGasFee = () => Promise.all([this.getGasFee()])
-        // .then((gas:any ={}) =>
-        // {
-        //     this.averageGasFeeModalLabel = gas
-        //     this.cdr.detectChanges()
-        // })
-
-        startTimer()
+        getRealTimeGasFee()
         {
             const length = 11
             
+            this.intervalSubscription = 
             interval(1000).pipe(take(length), map(count => length - count)).subscribe(seconds => {
 
                 this.timeLeft = (seconds - 1)
@@ -471,24 +536,132 @@ export class IndexMainComponent implements OnInit {
                  {
                     new Promise((resolve,reject) =>
                     {
+
                         this.ims.getGasFee().then((gas:any = {}) =>
                         {   
-                            resolve(gas.avg)
-                            this.averageGasFeeModalLabel = gas.avg
-                            console.log(gas.avg)
-                            this.startTimer()
+                            
+                            resolve(gas)
+                            console.log(gas)
+            
+                            if(this.finalizedPriorityRanges == undefined)
+                            {
+                                this.priorityRanges = 
+                                [
+                                    {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                                    {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                                    {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                                ]
+                                this.selectedPriorityRanges = this.priorityRanges[1]
+            
+                                this.averageGasFeeModalLabel = gas.avg
+                                this.editGasFeeModalLabel = gas.avg
+                                this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.getRealTimeGasFee()
+                            }
+            
+                            else if(this.finalizedPriorityRanges.name == 'Low')
+                            {
+                                this.priorityRanges = 
+                                [
+                                    {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                                    {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                                    {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                                ]
+                                this.selectedPriorityRanges = this.priorityRanges[0]
+            
+                                this.averageGasFeeModalLabel = gas.low
+                                this.editGasFeeModalLabel = gas.low
+                                this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                                this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                                this.getRealTimeGasFee()
+                            }
+            
+                            else if(this.finalizedPriorityRanges.name == 'Medium')
+                            {
+                                this.selectedPriorityRanges = this.priorityRanges[1]
+                                this.priorityRanges = 
+                                [
+                                    {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                                    {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                                    {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                                ]
+                                this.selectedPriorityRanges = this.priorityRanges[1]
+            
+                                this.averageGasFeeModalLabel = gas.avg
+                                this.editGasFeeModalLabel = gas.avg
+                                this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.getRealTimeGasFee()
+                            }
+            
+                            else if(this.finalizedPriorityRanges.name == 'High')
+                            {
+                                this.selectedPriorityRanges = this.priorityRanges[2]
+                                this.priorityRanges = 
+                                [
+                                    {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                                    {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                                    {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                                ]
+                                this.selectedPriorityRanges = this.priorityRanges[2]
+            
+                                this.averageGasFeeModalLabel = gas.high
+                                this.editGasFeeModalLabel = gas.high
+                                this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
+                                this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
+                                this.getRealTimeGasFee()
+                            }
 
+                            // console.log(this.finalizedPriorityRanges.name)
+            
+                           
+                            // this.selectedPriorityRanges = this.priorityRanges[1]
                         })  
+
+                        // this.ims.getGasFee().then((gas:any = {}) =>
+                        // {   
+                        //     resolve(gas)
+                        //     this.averageGasFeeModalLabel = gas.avg
+                        //     this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                        //     this.priorityRanges = 
+                        //     [
+                        //         {name: 'Low', fee: `${gas.low}`, keyword:'Perhaps in 30 seconds'}, 
+                        //         {name: 'Medium', fee: `${gas.avg}`, keyword:'Completed in <30 seconds'},
+                        //         {name: 'High', fee: `${gas.high}`,keyword:'Completed in <15 seconds'}
+                        //     ]
+                        //     this.selectedPriorityRanges = this.priorityRanges[1]
+                        //     this.editGasFeeModalLabel = gas.avg
+                        //     this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                        //     console.log(gas)
+                        //     this.getRealTimeGasFee()
+
+                        // })  
+
+
                     })
                  }
 
               })
         }
 
-        // setKey()
-        // {
-        //   console.log(this.as.getToken())
-        // }
+        editFeePriority()
+        {
+            this.editGasFeeModalLabel = this.selectedPriorityRanges.fee
+            this.editGasDescriptionModalLabel = this.selectedPriorityRanges.keyword
+        }
+
+        saveFeePriority()
+        {
+            if (this.intervalSubscription)
+            {
+                this.intervalSubscription.unsubscribe();
+                this.finalizedPriorityRanges = this.selectedPriorityRanges
+                this.txAdjustFeeModal = false
+                this.getInitialGasFee()
+                this.getRealTimeGasFee()
+            }
+        }
 
         // decrypytPrivateKey()
         // {
