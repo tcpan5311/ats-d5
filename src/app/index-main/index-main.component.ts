@@ -53,7 +53,7 @@ export class IndexMainComponent implements OnInit {
 
   disableClick: any = true
   txReviewModalSiteLabel: string = window.location.href
-  txReviewAmountLabel: string = ""
+  txReviewAmountLabel: any = ""
 
   txs:any = []
 
@@ -63,6 +63,7 @@ export class IndexMainComponent implements OnInit {
   finalizedPriorityRanges: any
   averageGasFeeModalLabel: any = ""
   averageGasDescriptionModalLabel: any = ""
+  totalFeeModalLabel: any = ""
 
   //Edit fee modal variables
   editGasFeeModalLabel: any = ""
@@ -81,9 +82,6 @@ export class IndexMainComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
-    this.getInitialGasFee()
-    this.getRealTimeGasFee()
 
     this.accountLoaded = false
     this.connectedToWallet()
@@ -314,13 +312,32 @@ export class IndexMainComponent implements OnInit {
 
         confirmFeeModal()
         {
-            this.txReviewModal = true
-            if(this.TokenFormGroup.value.inputAmount && this.TokenFormGroup.value.inputAddress != "")
+            if(this.accountLoaded == true)
             {
-                this.txReviewAmountLabel = this.TokenFormGroup.value.inputAmount
-                this.transactionReviewReceiverLabel = this.slicedAddress(this.TokenFormGroup.value.inputAddress)
+                if(this.TokenFormGroup.value.inputAmount !=undefined && this.TokenFormGroup.value.inputAddress != undefined)
+                {
+                    this.txReviewAmountLabel = this.TokenFormGroup.value.inputAmount
+                    this.transactionReviewReceiverLabel = this.slicedAddress(this.TokenFormGroup.value.inputAddress)
+                    this.getInitialGasFee()
+                    this.getRealTimeGasFee()
+                    this.txReviewModal = true
+                }
             }
-            
+
+            else
+            {
+                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
+            }
+           
+        }
+
+        rejectFeeModal()
+        {
+            if (this.intervalSubscription)
+            {
+                this.intervalSubscription.unsubscribe();
+                this.txReviewModal = false
+            }
         }
 
         launchAdjustFeeModal()
@@ -341,6 +358,9 @@ export class IndexMainComponent implements OnInit {
 
                 const toAmount = this.TokenFormGroup.value.inputAmount
                 const parsedAmount = ethers.utils.parseEther(toAmount)
+                console.log(ethers.utils.formatEther(parsedAmount))
+                const gLimit = 50000
+                const gPrice = (this.averageGasFeeModalLabel/gLimit) * 10 ** 18
                 const toAddress = this.TokenFormGroup.value.inputAddress
                 const currentTime = new Date()
                 const timeStamp = currentTime.getDate().toLocaleString()+"-"
@@ -352,19 +372,21 @@ export class IndexMainComponent implements OnInit {
                 const tx = 
                 {
                     to: toAddress,
-                    gasLimit: 50000,
-                    value: parsedAmount._hex,
+                    gasLimit: gLimit,
+                    gasPrice: gPrice,
+                    value: parsedAmount._hex
                 }
     
                 Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
                 {
                     console.log('txHash:'+ txObj.hash)
-
+                    this.txReviewModal = false
                     Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
                     {gasLimit: 900000})])
                     .then(([contractTxHash])=>
                     {
                         console.log('Contract txHash:'+contractTxHash.hash)
+                        console.log('Transaction completed')
                         this.TokenFormGroup.reset()
                         this.connectedToWallet()
                         this.cdr.detectChanges()
@@ -469,6 +491,8 @@ export class IndexMainComponent implements OnInit {
                     this.editGasFeeModalLabel = gas.avg
                     this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(gas.avg)
+                    this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
                 else if(this.finalizedPriorityRanges.name == 'Low')
@@ -485,6 +509,8 @@ export class IndexMainComponent implements OnInit {
                     this.editGasFeeModalLabel = gas.low
                     this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
                     this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
                 else if(this.finalizedPriorityRanges.name == 'Medium')
@@ -501,6 +527,8 @@ export class IndexMainComponent implements OnInit {
                     this.editGasFeeModalLabel = gas.avg
                     this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
                 else if(this.finalizedPriorityRanges.name == 'High')
@@ -517,14 +545,18 @@ export class IndexMainComponent implements OnInit {
                     this.editGasFeeModalLabel = gas.high
                     this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
                 // this.selectedPriorityRanges = this.priorityRanges[1]
+               
             })  
         })
 
         getRealTimeGasFee()
         {
+            // this.totalFeeModalLabel = ""
             const length = 11
             
             this.intervalSubscription = 
@@ -557,7 +589,8 @@ export class IndexMainComponent implements OnInit {
                                 this.editGasFeeModalLabel = gas.avg
                                 this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
-                                this.getRealTimeGasFee()
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
                             else if(this.finalizedPriorityRanges.name == 'Low')
@@ -574,7 +607,8 @@ export class IndexMainComponent implements OnInit {
                                 this.editGasFeeModalLabel = gas.low
                                 this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
                                 this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
-                                this.getRealTimeGasFee()
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
                             else if(this.finalizedPriorityRanges.name == 'Medium')
@@ -592,7 +626,8 @@ export class IndexMainComponent implements OnInit {
                                 this.editGasFeeModalLabel = gas.avg
                                 this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
-                                this.getRealTimeGasFee()
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
                             else if(this.finalizedPriorityRanges.name == 'High')
@@ -610,13 +645,12 @@ export class IndexMainComponent implements OnInit {
                                 this.editGasFeeModalLabel = gas.high
                                 this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
-                                this.getRealTimeGasFee()
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
 
-                            // console.log(this.finalizedPriorityRanges.name)
-            
-                           
-                            // this.selectedPriorityRanges = this.priorityRanges[1]
+                            this.getRealTimeGasFee()
+
                         })  
 
                         // this.ims.getGasFee().then((gas:any = {}) =>
@@ -662,6 +696,7 @@ export class IndexMainComponent implements OnInit {
                 this.getRealTimeGasFee()
             }
         }
+
 
         // decrypytPrivateKey()
         // {
