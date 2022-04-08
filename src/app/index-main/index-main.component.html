@@ -1,6 +1,11 @@
 
-<!-- <p-blockUI [target]="body" [blocked]="blockedPanel"><p-progressSpinner></p-progressSpinner></p-blockUI> -->
-<div #body>
+<p-blockUI [blocked]="blockedDocument">
+    <p-progressSpinner [style]="{width: '125px', height: '125px'}" 
+    styleClass="custom-spinner" strokeWidth="2" fill="#EEEEEE" animationDuration=".5s"></p-progressSpinner>
+</p-blockUI>
+<!-- <p-blockUI [target]="body" [blocked]="blockedPanel">
+    <i class="pi pi-lock" style="font-size: 3rem"></i>
+</p-blockUI> -->
 
 <br>
 <div class="header">
@@ -107,7 +112,7 @@
     </p-panel>
 </div>
 
-<p-button (click)="returnTransaction()" label="Test" class="p-button-text"></p-button>
+<p-button (click)="lockScreen()" label="Test" class="p-button-text"></p-button>
    
 
 </div>
@@ -140,7 +145,7 @@
             <p-button icon="pi pi-check" (click)="importWallet()" label="Import" class="p-button-text"></p-button>
         </ng-template>
 </p-dialog>
-</div>
+
 
 <p-dialog header="Transaction review" [(visible)]="txReviewModal" [modal]="true" [style]="{width: '50vw'}" [baseZIndex]="10000"
     [draggable]="false" [resizable]="false" [maximizable]="true" [closable]="false">

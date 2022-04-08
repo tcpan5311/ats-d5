@@ -30,7 +30,7 @@ export class IndexMainService {
 
       Promise.all([this.response]).then(([r])=>{
 
-        const gasLimit = 50000
+        const gasLimit = 100000
         const lowGasPricePerUnit = Number(r.low)
         const avgGasPricePerUnit = Number(r.average)
         const highGasPricePerUnit = Number(r.high)

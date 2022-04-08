@@ -43,7 +43,7 @@ export class IndexMainComponent implements OnInit {
   modal_msg !: Message[]
   index_msg !: Toast[]
 
-  blockedPanel: boolean = false;
+  blockedDocument: boolean = false;
 
   i_amount !: number
   i_address !: String
@@ -83,6 +83,7 @@ export class IndexMainComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.PrimeNGConfig.ripple = true;
     this.accountLoaded = false
     this.connectedToWallet()
     this.txReviewAmountLabel = "Not available"
@@ -333,74 +334,14 @@ export class IndexMainComponent implements OnInit {
 
         rejectFeeModal()
         {
-            if (this.intervalSubscription)
-            {
-                this.intervalSubscription.unsubscribe();
-                this.txReviewModal = false
-            }
+            this.stopTimer()
+            this.txReviewModal = false
         }
 
         launchAdjustFeeModal()
         {
             this.txAdjustFeeModal =  true
         }
-
-        sendTransaction()
-        {
-            if(this.accountLoaded == true)
-            {
-                //Initialize wallet and contract
-                const provider = ethers.getDefaultProvider('rinkeby');
-                const contractAddress = this.ims.getContractAddress()
-                const contractABI = this.ims.getContractABI()
-                const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
-                const contract = new ethers.Contract(contractAddress,contractABI,wallet)
-
-                const toAmount = this.TokenFormGroup.value.inputAmount
-                const parsedAmount = ethers.utils.parseEther(toAmount)
-                console.log(ethers.utils.formatEther(parsedAmount))
-                const gLimit = 50000
-                const gPrice = (this.averageGasFeeModalLabel/gLimit) * 10 ** 18
-                const toAddress = this.TokenFormGroup.value.inputAddress
-                const currentTime = new Date()
-                const timeStamp = currentTime.getDate().toLocaleString()+"-"
-                                +(currentTime.getMonth()+1).toLocaleString()+"-"
-                                +currentTime.getFullYear()+" "
-                                +currentTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-                                
-                //gasPrice: 
-                const tx = 
-                {
-                    to: toAddress,
-                    gasLimit: gLimit,
-                    gasPrice: gPrice,
-                    value: parsedAmount._hex
-                }
-    
-                Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
-                {
-                    console.log('txHash:'+ txObj.hash)
-                    this.txReviewModal = false
-                    Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
-                    {gasLimit: 900000})])
-                    .then(([contractTxHash])=>
-                    {
-                        console.log('Contract txHash:'+contractTxHash.hash)
-                        console.log('Transaction completed')
-                        this.TokenFormGroup.reset()
-                        this.connectedToWallet()
-                        this.cdr.detectChanges()
-                    })
-                })
-            }
-
-            else
-            {
-                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
-            }
-                
-        }
-            
 
         returnTransaction()
         {
@@ -465,11 +406,6 @@ export class IndexMainComponent implements OnInit {
             this.MessageService.add({key: 't1', severity:'info', summary: 'Info', detail: 'Wallet disconnected'});
             this.cdr.detectChanges()
         }       
-
-        slicedAddress(value:string)
-        {
-            return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
-        }
 
         getInitialGasFee = () => new Promise((resolve,reject) =>
         {
@@ -653,6 +589,8 @@ export class IndexMainComponent implements OnInit {
 
                         })  
 
+                        
+
                         // this.ims.getGasFee().then((gas:any = {}) =>
                         // {   
                         //     resolve(gas)
@@ -679,6 +617,67 @@ export class IndexMainComponent implements OnInit {
               })
         }
 
+        sendTransaction()
+        {
+            if(this.accountLoaded == true)
+            {
+                this.txReviewModal = false
+                this.blockedDocument = true
+                //Initialize wallet and contract
+                const provider = ethers.getDefaultProvider('rinkeby');
+                const contractAddress = this.ims.getContractAddress()
+                const contractABI = this.ims.getContractABI()
+                const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
+                const contract = new ethers.Contract(contractAddress,contractABI,wallet)
+
+                const toAmount = this.TokenFormGroup.value.inputAmount
+                const parsedAmount = ethers.utils.parseEther(toAmount)
+                console.log(ethers.utils.formatEther(parsedAmount))
+                const gLimit = 100000
+                const gPrice = (this.averageGasFeeModalLabel/gLimit) * 10 ** 18
+                const toAddress = this.TokenFormGroup.value.inputAddress
+                const currentTime = new Date()
+                const timeStamp = currentTime.getDate().toLocaleString()+"-"
+                                +(currentTime.getMonth()+1).toLocaleString()+"-"
+                                +currentTime.getFullYear()+" "
+                                +currentTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+                                
+                //gasPrice: 
+                const tx = 
+                {
+                    to: toAddress,
+                    gasLimit: gLimit,
+                    gasPrice: gPrice,
+                    value: parsedAmount._hex
+                }
+    
+                Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
+                {
+                    console.log('txHash:'+ txObj.hash)
+                    this.txReviewModal = false
+                    Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
+                    {gasLimit: 900000})])
+                    .then(([contractTxHash])=>
+                    {
+                        console.log('Contract txHash:'+contractTxHash.hash)
+                        console.log('Transaction completed')
+                        this.TokenFormGroup.reset()
+                        this.stopTimer()
+                        this.blockedDocument = false
+                        this.connectedToWallet()
+                        this.returnTransaction()
+                        this.cdr.detectChanges()
+                    })
+                })
+            }
+
+            else
+            {
+                this.MessageService.add({key: 't1', severity:'error', summary: 'Error', detail: 'Wallet not connected'});
+            }
+                
+        }
+
         editFeePriority()
         {
             this.editGasFeeModalLabel = this.selectedPriorityRanges.fee
@@ -694,6 +693,33 @@ export class IndexMainComponent implements OnInit {
                 this.txAdjustFeeModal = false
                 this.getInitialGasFee()
                 this.getRealTimeGasFee()
+            }
+        }
+
+        slicedAddress(value:string)
+        {
+            return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
+        }
+
+        lockScreen()
+        {
+            if(this.blockedDocument == false)
+            {
+                this.blockedDocument = true
+            }
+
+            else
+            {
+                this.blockedDocument = false
+            }
+
+        }
+
+        stopTimer()
+        {
+            if (this.intervalSubscription)
+            {
+                this.intervalSubscription.unsubscribe();
             }
         }
 
