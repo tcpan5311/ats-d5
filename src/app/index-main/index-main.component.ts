@@ -653,21 +653,41 @@ export class IndexMainComponent implements OnInit {
     
                 Promise.all([wallet.sendTransaction(tx)]).then(([txObj])=>
                 {
-                    console.log('txHash:'+ txObj.hash)
+                    const txHash = txObj.hash.toString()
                     this.txReviewModal = false
-                    Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
-                    {gasLimit: 900000})])
-                    .then(([contractTxHash])=>
+
+                    Promise.all([txObj.wait()]).then(([result]) =>
                     {
-                        console.log('Contract txHash:'+contractTxHash.hash)
-                        console.log('Transaction completed')
+                        const txHistoryObj = 
+                        {
+                            TxHash: txObj.hash,
+                            From: this.as.getToken().address,
+                            To: toAddress,
+                            Amount: toAmount,
+                            Timestamp: timeStamp
+                        }
+                        this.ims.saveTransactionHistory(txHistoryObj)
+                        
                         this.TokenFormGroup.reset()
                         this.stopTimer()
                         this.blockedDocument = false
                         this.connectedToWallet()
-                        this.returnTransaction()
                         this.cdr.detectChanges()
                     })
+
+                    // Promise.all([contract.publishTransaction(toAddress,parsedAmount,timeStamp,
+                    // {gasLimit: 900000})])
+                    // .then(([contractTxHash])=>
+                    // {
+                    //     console.log('Contract txHash:'+contractTxHash.hash)
+                    //     console.log('Transaction completed')
+                    //     this.TokenFormGroup.reset()
+                    //     this.stopTimer()
+                    //     this.blockedDocument = false
+                    //     this.connectedToWallet()
+                    //     this.returnTransaction()
+                    //     this.cdr.detectChanges()
+                    // })
                 })
             }
 

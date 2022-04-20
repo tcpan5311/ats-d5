@@ -8,6 +8,7 @@ import { HttpClient,HttpHeaders } from '@angular/common/http';
 export class IndexMainService {
 
   private fetchGasFeeUrl =  'http://localhost:3000/getGasFee'
+  private saveTransactionHistoryUrl = 'http://localhost:3000/api/transactions'
   response:any
 
   constructor(private HttpClient: HttpClient) { }
@@ -58,6 +59,24 @@ export class IndexMainService {
         reject(err)
       })
     })
+  }
+
+  saveTransactionHistory(transaction_history:any)
+  {
+    // const headers = new HttpHeaders()
+    // .set('Authorization', 'my-auth-token')
+    // .set('Content-Type', 'application/json')
+
+    // this.HttpClient.post(this.saveTransactionHistoryUrl,transaction_history, {
+    //   headers: headers
+    // })
+    // .subscribe(data => {
+    //   console.log(data);
+    // })
+    return this.HttpClient.post(this.saveTransactionHistoryUrl, transaction_history)
+    .subscribe(
+      error => console.log(error)
+    );
   }
 
   // Error handling
