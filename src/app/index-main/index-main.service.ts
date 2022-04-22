@@ -9,6 +9,7 @@ export class IndexMainService {
 
   private fetchGasFeeUrl =  'http://localhost:3000/getGasFee'
   private saveTransactionHistoryUrl = 'http://localhost:3000/api/transactions'
+  private saveNewUserAddressUrl = 'http://localhost:3000/api/users'
   response:any
 
   constructor(private HttpClient: HttpClient) { }
@@ -74,6 +75,14 @@ export class IndexMainService {
     //   console.log(data);
     // })
     return this.HttpClient.post(this.saveTransactionHistoryUrl, transaction_history)
+    .subscribe(
+      error => console.log(error)
+    );
+  }
+
+  saveNewUserAddress(new_user_address:any)
+  {
+    return this.HttpClient.post(this.saveNewUserAddressUrl, new_user_address)
     .subscribe(
       error => console.log(error)
     );

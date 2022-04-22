@@ -248,6 +248,13 @@ export class IndexMainComponent implements OnInit {
                     const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
                     const node = hdnode.derivePath(walletPath.standard);
                     this.as.saveToken(node)
+                    const userAddressObj = 
+                    {
+                        address: node.address
+                    }
+
+                    this.ims.saveNewUserAddress(userAddressObj)
+
                     this.connectedToWallet()
                     this.uploadedFiles = []
                     this.displayModal = false
