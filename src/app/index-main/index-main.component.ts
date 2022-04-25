@@ -283,10 +283,9 @@ export class IndexMainComponent implements OnInit {
         {
             if(this.as.getToken() != undefined)
             {
-                const n = this.as.getToken()
-                this.connectButtonLabel = this.slicedAddress(n.address)
-                this.panelAddressLabel = this.slicedAddress(n.address)
-                this.transactionReviewSenderLabel = this.slicedAddress(n.address)
+                this.connectButtonLabel = this.slicedAddress(this.as.getToken().address)
+                this.panelAddressLabel = this.slicedAddress(this.as.getToken().address)
+                this.transactionReviewSenderLabel = this.slicedAddress(this.as.getToken().address)
                 this.accountLoaded = true
                 this.readBalance()
                 this.returnTransaction()
@@ -355,46 +354,59 @@ export class IndexMainComponent implements OnInit {
 
             if(this.accountLoaded == true)
             {
-                console.log("This is return transaction")
-                //Initialize wallet and contract
-                const provider = ethers.getDefaultProvider('rinkeby');
-                let contractAddress = this.ims.getContractAddress()
-                let contractABI = this.ims.getContractABI()
-                const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
-                const contract = new ethers.Contract(contractAddress,contractABI,wallet)
-
-
-                Promise.all([contract.readTransactionLength()]).then(([result])=>
+                const searchAddressObj = 
                 {
-                    result = parseFloat(ethers.utils.formatEther(result))
-                    result = parseInt((result * Math.pow(10,18)).toFixed())
+                    searchAddress: this.as.getToken().address
+                }
+
+              this.ims.getTransactionHistory(searchAddressObj).subscribe((response: any) =>
+              {
+                 for(let i=0;i<response.length;i++)
+                 {
+                    console.log(response[i].txHistory)
+                 }
+              })
+                
+                // console.log("This is return transaction")
+                // //Initialize wallet and contract
+                // const provider = ethers.getDefaultProvider('rinkeby');
+                // let contractAddress = this.ims.getContractAddress()
+                // let contractABI = this.ims.getContractABI()
+                // const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
+                // const contract = new ethers.Contract(contractAddress,contractABI,wallet)
+
+
+                // Promise.all([contract.readTransactionLength()]).then(([result])=>
+                // {
+                //     result = parseFloat(ethers.utils.formatEther(result))
+                //     result = parseInt((result * Math.pow(10,18)).toFixed())
                     
-                    let tx_promises = []
+                //     let tx_promises = []
                     
-                    let index = (result - 1)
-                    while(index >= 0)
-                    {
-                        let tx_promise = contract.readTransaction(index)
-                        tx_promises.push(tx_promise)
+                //     let index = (result - 1)
+                //     while(index >= 0)
+                //     {
+                //         let tx_promise = contract.readTransaction(index)
+                //         tx_promises.push(tx_promise)
 
-                        index --
-                    }
+                //         index --
+                //     }
 
-                    Promise.all(tx_promises).then((result)=>
-                    {
-                        this.txs = result.map((element, index) => {
+                //     Promise.all(tx_promises).then((result)=>
+                //     {
+                //         this.txs = result.map((element, index) => {
 
-                            return {
-                              fromAddress: this.slicedAddress(this.as.getToken().address),
-                              toAddress: this.slicedAddress(element[0]),
-                              amount: ethers.utils.formatEther(element[1]),
-                              timestamp: element[2]
-                            }
-                          });
-                        this.cdr.detectChanges()
-                    });
+                //             return {
+                //               fromAddress: this.slicedAddress(this.as.getToken().address),
+                //               toAddress: this.slicedAddress(element[0]),
+                //               amount: ethers.utils.formatEther(element[1]),
+                //               timestamp: element[2]
+                //             }
+                //           });
+                //         this.cdr.detectChanges()
+                //     });
 
-                })
+                // })
             }
      
         }

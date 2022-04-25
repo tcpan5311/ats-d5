@@ -10,6 +10,7 @@ export class IndexMainService {
   private fetchGasFeeUrl =  'http://localhost:3000/getGasFee'
   private saveTransactionHistoryUrl = 'http://localhost:3000/api/transactions'
   private saveNewUserAddressUrl = 'http://localhost:3000/api/users'
+  private getTransactionHistoryUrl = 'http://localhost:3000/api/retriveTxHistory'
   response:any
 
   constructor(private HttpClient: HttpClient) { }
@@ -86,6 +87,11 @@ export class IndexMainService {
     .subscribe(
       error => console.log(error)
     );
+  }
+
+  getTransactionHistory(find_address:any)
+  {
+     return this.HttpClient.post(this.getTransactionHistoryUrl,find_address)
   }
 
   // Error handling
