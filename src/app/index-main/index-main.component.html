@@ -83,10 +83,16 @@
     </p-card>
 </div>
 
-<div class="col-8 col-md-8">
+<div class="col-12 col-md-12">
+<br>
+<br>
+<br>
 </div>
 
-<div class = "col-4 col-md-4">
+<div class="col-6 col-md-6">
+</div>
+
+<div class = "col-6 col-md-6">
     <p-panel header="Transaction history">
 
         <p-scrollPanel [style]="{height: '200px'}">
@@ -100,6 +106,7 @@
         </p>
 
          <p *ngFor="let tx of txs;">
+           Tx Hash:{{tx.txHash}}<br>
            From: {{tx.fromAddress}}<br>
            To: {{tx.toAddress}}<br>
            Amount: {{tx.amount}} Ether<br>

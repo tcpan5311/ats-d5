@@ -361,10 +361,24 @@ export class IndexMainComponent implements OnInit {
 
               this.ims.getTransactionHistory(searchAddressObj).subscribe((response: any) =>
               {
-                 for(let i=0;i<response.length;i++)
-                 {
-                    console.log(response[i].txHistory)
-                 }
+                 console.log(response)
+                 response = response.map((r: { txHistory: any; }) => r.txHistory)
+                 response = response[0]
+
+                 this.txs = response.map((element:any, index:any) => {
+
+                    return {
+                                txHash: element.TxHash,
+                                fromAddress: this.slicedAddress(element.From),
+                                toAddress: this.slicedAddress(element.To),
+                                amount: element.Amount,
+                                timestamp: element.Timestamp
+                            }
+                });
+
+                console.log(this.txs)
+
+
               })
                 
                 // console.log("This is return transaction")
