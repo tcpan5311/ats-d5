@@ -342,6 +342,12 @@ export class IndexMainComponent implements OnInit {
         {
             this.stopTimer()
             this.txReviewModal = false
+            this.averageGasFeeModalLabel = ""
+            this.editGasFeeModalLabel = ""
+            this.averageGasDescriptionModalLabel = ""
+            this.editGasDescriptionModalLabel = ""
+            this.totalFeeModalLabel = ""
+            this.totalFeeModalLabel = ""
         }
 
         launchAdjustFeeModal()
@@ -361,7 +367,6 @@ export class IndexMainComponent implements OnInit {
 
               this.ims.getTransactionHistory(searchAddressObj).subscribe((response: any) =>
               {
-                 console.log(response)
                  response = response.map((r: { txHistory: any; }) => r.txHistory)
                  response = response[0]
 
@@ -372,7 +377,7 @@ export class IndexMainComponent implements OnInit {
                                 fromAddress: this.slicedAddress(element.From),
                                 toAddress: this.slicedAddress(element.To),
                                 amount: element.Amount,
-                                timestamp: element.Timestamp
+                                timestamp: this.alterDateFormat(element.createdAt)
                             }
                 });
 
@@ -669,11 +674,6 @@ export class IndexMainComponent implements OnInit {
                 const gLimit = 100000
                 const gPrice = (this.averageGasFeeModalLabel/gLimit) * 10 ** 18
                 const toAddress = this.TokenFormGroup.value.inputAddress
-                const currentTime = new Date()
-                const timeStamp = currentTime.getDate().toLocaleString()+"-"
-                                +(currentTime.getMonth()+1).toLocaleString()+"-"
-                                +currentTime.getFullYear()+" "
-                                +currentTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
                                 
                 //gasPrice: 
                 const tx = 
@@ -696,8 +696,7 @@ export class IndexMainComponent implements OnInit {
                             TxHash: txObj.hash,
                             From: this.as.getToken().address,
                             To: toAddress,
-                            Amount: toAmount,
-                            Timestamp: timeStamp
+                            Amount: toAmount
                         }
                         this.ims.saveTransactionHistory(txHistoryObj)
                         
@@ -721,7 +720,10 @@ export class IndexMainComponent implements OnInit {
                     //     this.returnTransaction()
                     //     this.cdr.detectChanges()
                     // })
-                })
+                }).catch
+                {
+                    this.stopTimer()
+                }
             }
 
             else
@@ -752,6 +754,17 @@ export class IndexMainComponent implements OnInit {
         slicedAddress(value:string)
         {
             return (`${value.slice(0, 7)} ... ${value.slice(35)}`)
+        }
+
+        alterDateFormat(value:any)
+        {
+            value = new Date(value)
+            let timeStamp = value.getDate().toLocaleString()+"-"
+            +(value.getMonth()+1).toLocaleString()+"-"
+            +value.getFullYear()+" "
+            +value.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+
+            return timeStamp
         }
 
         lockScreen()
