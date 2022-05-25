@@ -1,5 +1,5 @@
-<br>
-<div class="grid">
+
+<div class="grid mint-nft-container">
 
     <div class="col-1 col-md-1">
     </div>
@@ -7,21 +7,46 @@
     <div class="col-8 col-md-8">
 
         <p-card header="Create new item">
-            <b>File type supported JPG, PNG, GIF. Max size: 40MB</b>
-            <p class="p-m-0">Please select the NFT image file you will like to mint.</p>
 
-            <p-fileUpload #fileUpload 
-            mode="basic" 
-            chooseLabel="Browse"
-            accept=".txt" 
-            [auto]="true" 
-            [maxFileSize]="1000000" 
-            [customUpload]="true">
-            </p-fileUpload>
+            <form>
+                <b>File type supported JPG, PNG, GIF. Max size: 40MB</b>
+                <p class="p-m-0">Please select the NFT image file you will like to mint.</p>
+
+                <p-fileUpload #fileUpload 
+                mode="basic" 
+                chooseLabel="Browse"
+                accept=".txt" 
+                [auto]="true" 
+                [maxFileSize]="1000000" 
+                [customUpload]="true">
+                </p-fileUpload>
+
+                <br>
+                <div class="p-inputgroup">
+                    <input type="text" pInputText placeholder="Name">
+                </div>
+
+                <br>
+                <div class="p-inputgroup">
+                    <input type="text" pInputText placeholder="External Link">
+                </div>
+
+                <br>
+                <div class="p-inputgroup">
+                    <input type="text" pInputText placeholder="Description">
+                </div>
+
+            </form>
+            
 
         </p-card>
         
     </div>
-    
+</div>
+
+<div class="grid">
+    <div class="">
+
+    </div>
 </div>
 
