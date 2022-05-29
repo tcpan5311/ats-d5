@@ -1,3 +1,60 @@
 
+<div class="header">
+    <p-menubar [model]="items">
+        <div>
+            <button type="button" icon="pi pi-wallet" pButton label="{{connectButtonLabel}}" style="margin-left:.25em" (click)="openKeystoreModal()"
+            [disabled]="accountLoaded == true"></button>
+        </div>
+    </p-menubar>
+</div>
+
+<p-dialog header="Import wallet" [(visible)]="displayModal" [modal]="true" [style]="{width: '50vw'}" [baseZIndex]="10000"
+    [draggable]="false" [resizable]="false">
+    <p-messages [(value)]="modal_msg"></p-messages> 
+    <p class="p-m-0">Please select your keystore file to import wallet.</p>
+    <p-fileUpload #fileUpload 
+    mode="basic" 
+    chooseLabel="Browse"
+    accept=".txt" 
+    [auto]="true" 
+    [maxFileSize]="1000000" 
+    [customUpload]="true" 
+
+    (uploadHandler)="onUploadFile($event,fileUpload)">
+    </p-fileUpload>
+
+     <br>
+    <p-button icon="pi pi-times" *ngIf="uploadedFiles.length != 0" (click)="removeUpload()" label="Remove" class="p-button-text"></p-button>
+
+    <ng-template pTemplate="content">
+        <div *ngIf="uploadedFiles.length">
+            <p *ngFor="let file of uploadedFiles">File selected: {{file.name}} - {{file.size}} bytes</p>
+        </div>
+    </ng-template>
+
+        <ng-template pTemplate="footer">
+            <p-button icon="pi pi-check" (click)="importWallet()" label="Import" class="p-button-text"></p-button>
+        </ng-template>
+</p-dialog>
+
+<br>
+<br>
+
+<div class="grid">
+
+    <div class="col-9 col-md-9">
+    </div>
+
+    <div class="col-3 col-md-3">
+        <p-fieldset legend="Wallet Info" [toggleable]="true">
+            <h4>{{panelAddressLabel}}</h4>
+                <p>{{panelBalanceLabel}}</p>
+                <p-button icon="pi pi-times" *ngIf= "accountLoaded == true" (click)="disconnectWallet()" label="Disconnect wallet" class="p-button-text"></p-button>
+        </p-fieldset>
+    </div>
+
+</div>
+
+<p-toast key="t1" position="bottom-right"></p-toast> 
 
 <router-outlet></router-outlet>

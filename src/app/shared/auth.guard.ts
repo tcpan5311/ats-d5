@@ -17,16 +17,7 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
 
-    if(this.AuthService.connectedToWallet !== true) 
-    {
-        window.alert("Access not allowed!")
-        return false
-    }
-
-    else
-    {
-      return true;
-    }
+   return false
 
   }
 

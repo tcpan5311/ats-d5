@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { ethers } from 'ethers';
 import crypto from "crypto-ES";
 import { Cipher, CipherCCMTypes } from 'crypto';
+import { Subject } from 'rxjs';
 
 
 @Injectable({
@@ -42,20 +43,41 @@ export class AuthService {
 
   }
 
-
-
-  get connectedToWallet(): boolean 
+  verifyConnectWallet()
   {
-    let authToken = sessionStorage.getItem('access_token');
-    return authToken !== null ? true : false;
-  }
-
-  disconnectFromWallet()
-  {
-    let removeToken = localStorage.removeItem('access_token');
-    if (removeToken == null) 
+    if(this.getToken() != undefined)
     {
-      this.Router.navigate(['log-in']);
+      return true
     }
+
+    else
+    {
+      return false
+    }
+  } 
+
+  //Shared function for wallet interaction
+  private ConnectWalletCallSource = new Subject<any>();
+  ConnectWalletMethodCalled$ = this.ConnectWalletCallSource.asObservable();
+
+  callConnectWalletMethod() {
+    this.ConnectWalletCallSource.next();
   }
+
+  private DisconnectWalletCallSource = new Subject<any>();
+  DisconnectWalletMethodCalled$ = this.DisconnectWalletCallSource.asObservable();
+
+  callDisconnectWalletMethod()
+  {
+    this.DisconnectWalletCallSource.next()
+  }
+
+  private ReadBalanceCallSource = new Subject<any>();
+  ReadBalanceMethodCalled$ = this.ReadBalanceCallSource.asObservable();
+
+  callReadBalanceMethod()
+  {
+    this.ReadBalanceCallSource.next()
+  }
+
 }

@@ -61,8 +61,8 @@ export class IndexMainComponent implements OnInit {
   priorityRanges: any = []
   selectedPriorityRanges: any
   finalizedPriorityRanges: any
-  averageGasFeeModalLabel: any = ""
-  averageGasDescriptionModalLabel: any = ""
+  selectedGasFeeModalLabel: any = ""
+  selectedGasDescriptionModalLabel: any = ""
   totalFeeModalLabel: any = ""
 
   //Edit fee modal variables
@@ -78,14 +78,28 @@ export class IndexMainComponent implements OnInit {
   private PrimeNGConfig: PrimeNGConfig, private ims: IndexMainService, private as:AuthService,
   public DialogService:DialogService) 
   {    
-        
+    
+    //Calling function from shared service module
+    this.as.ConnectWalletMethodCalled$.subscribe(
+        () => 
+        {
+          this.connectToWallet()
+        }
+      );
+
+      this.as.DisconnectWalletMethodCalled$.subscribe(
+        () => 
+        {
+          this.disconnectWallet()
+        }
+      );
   }
 
   ngOnInit(): void {
 
     this.PrimeNGConfig.ripple = true;
     this.accountLoaded = false
-    this.connectedToWallet()
+    this.connectToWallet()
     this.txReviewAmountLabel = "Not available"
     this.selectedPriorityRanges = this.priorityRanges[1]
 
@@ -162,132 +176,62 @@ export class IndexMainComponent implements OnInit {
     {
         return this.TokenFormGroup.controls;
     }
-
-    openKeystoreModal()
-    {
-        this.displayModal = true;
-    }
-
-    uploadedFiles: any[] = [];
-    onUploadFile(e:any,fileUpload:any)
-    {
-        console.log("File uploaded")
-        for(let file of e.files) {
-            
-            if(this.uploadedFiles.length <= 0)
-            {
-                this.uploadedFiles.push(file);
-            }
-
-            else
-            {
-                this.modal_msg = [
-                    {severity: 'warn', summary: 'Warning', detail: 'Please remove imported file first'}
-                ];
-                // this.messageService.add({severity: 'error', summary: 'Error', detail: 'Multiple files upload are not allowed'});
-            }
-        }
-
-        fileUpload.clear()
-        
-    }
-
-    removeUpload()
-    {
-        this.uploadedFiles = []
-        this.cdr.detectChanges()
-    }
-
-    importWallet()
-    {
-        if(this.uploadedFiles.length != 0)
-        {
-            let fileReader = new FileReader();
-            fileReader.readAsText(this.uploadedFiles[0]);
-            fileReader.onload = (e) => {
-                if(fileReader.result != "" && fileReader.result != null)
-                {
-                    console.log(fileReader.result);
-                    this.decryptFromPhase(fileReader.result)
-                    
-                    
-                }
-
-                else
-                {
-                    this.modal_msg = [
-                        {severity: 'error', summary: 'Error', detail: 'File is empty'}
-                    ];
-                }
-            }
-        }
-
-        else
-        {
-
-            this.modal_msg = [
-                {severity: 'error', summary: 'Error', detail: 'No key file are uploaded'}
-            ];
-        }
-    }
     
-        decryptFromPhase(mnemonic: any)
-        {
-            if(this.as.getToken() == undefined)
-            {
-                let walletPath = {
-                    "standard": "m/44'/60'/0'/0/0", 
-                    // Changing the last digit will give the sequence of address
-                    // For Ex: "m/44'/60'/0'/0/1" will give 2nd Address
+    //     decryptFromPhase(mnemonic: any)
+    //     {
+    //         if(this.as.getToken() == undefined)
+    //         {
+    //             let walletPath = {
+    //                 "standard": "m/44'/60'/0'/0/0", 
+    //                 // Changing the last digit will give the sequence of address
+    //                 // For Ex: "m/44'/60'/0'/0/1" will give 2nd Address
                 
-                };
+    //             };
                 
-                try
-                {
-                    //mnemonic phase = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
-                    const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-                    const node = hdnode.derivePath(walletPath.standard);
-                    this.as.saveToken(node)
-                    const userAddressObj = 
-                    {
-                        address: node.address
-                    }
+    //             try
+    //             {
+    //                 //mnemonic phase = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
+    //                 const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    //                 const node = hdnode.derivePath(walletPath.standard);
+    //                 this.as.saveToken(node)
+    //                 const userAddressObj = 
+    //                 {
+    //                     address: node.address
+    //                 }
 
-                    this.ims.saveNewUserAddress(userAddressObj)
+    //                 this.ims.saveNewUserAddress(userAddressObj)
 
-                    this.connectedToWallet()
-                    this.uploadedFiles = []
-                    this.displayModal = false
-                    this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
-                }
+    //                 this.connectedToWallet()
+    //                 this.uploadedFiles = []
+    //                 this.displayModal = false
+    //                 this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
+    //             }
     
-                catch(error)
-                {
-                    console.log(error)
-                    this.modal_msg = [
-                        {severity: 'error', summary: 'Error', detail: 'Invalid mnemonic phase provided'}
-                    ];
-                }
-            }
+    //             catch(error)
+    //             {
+    //                 console.log(error)
+    //                 this.modal_msg = [
+    //                     {severity: 'error', summary: 'Error', detail: 'Invalid mnemonic phase provided'}
+    //                 ];
+    //             }
+    //         }
 
-            else
-            {
-                this.modal_msg = [
-                    {severity: 'error', summary: 'Error', detail: 'Wallet already imported'}
-                ];
-            }
+    //         else
+    //         {
+    //             this.modal_msg = [
+    //                 {severity: 'error', summary: 'Error', detail: 'Wallet already imported'}
+    //             ];
+    //         }
             
-        }
+    //     }
 
-        connectedToWallet()
+        connectToWallet()
         {
-            if(this.as.getToken() != undefined)
+            if(this.as.verifyConnectWallet() == true)
             {
-                this.connectButtonLabel = this.slicedAddress(this.as.getToken().address)
-                this.panelAddressLabel = this.slicedAddress(this.as.getToken().address)
                 this.transactionReviewSenderLabel = this.slicedAddress(this.as.getToken().address)
                 this.accountLoaded = true
-                this.readBalance()
+                this.as.callReadBalanceMethod()
                 this.returnTransaction()
             }
 
@@ -298,28 +242,9 @@ export class IndexMainComponent implements OnInit {
             
         }
 
-        readBalance()
-        {
-            if(this.accountLoaded == true)
-            {
-                this.panelBalanceLabel = "Loading..."
-                const provider = ethers.getDefaultProvider('rinkeby')
-
-                provider.getBalance(this.as.getToken().address).then((balance) => 
-                {
-                    let balanceInEth = parseFloat(ethers.utils.formatEther(balance))
-                    balanceInEth = Math.round(balanceInEth * 10000 + Number.EPSILON)/10000
-
-                    this.panelBalanceLabel = (`Balance of account: ${balanceInEth} Ether`)
-                    this.cdr.detectChanges()
-                })
-            }
-            
-        }
-
         confirmFeeModal()
         {
-            if(this.accountLoaded == true)
+            if(this.as.verifyConnectWallet() == true)
             {
                 if(this.TokenFormGroup.value.inputAmount !=undefined && this.TokenFormGroup.value.inputAddress != undefined)
                 {
@@ -342,11 +267,10 @@ export class IndexMainComponent implements OnInit {
         {
             this.stopTimer()
             this.txReviewModal = false
-            this.averageGasFeeModalLabel = ""
+            this.selectedGasFeeModalLabel = ""
             this.editGasFeeModalLabel = ""
-            this.averageGasDescriptionModalLabel = ""
+            this.selectedGasDescriptionModalLabel = ""
             this.editGasDescriptionModalLabel = ""
-            this.totalFeeModalLabel = ""
             this.totalFeeModalLabel = ""
         }
 
@@ -358,7 +282,7 @@ export class IndexMainComponent implements OnInit {
         returnTransaction()
         {
 
-            if(this.accountLoaded == true)
+            if(this.as.verifyConnectWallet() == true)
             {
                 const searchAddressObj = 
                 {
@@ -433,17 +357,18 @@ export class IndexMainComponent implements OnInit {
         disconnectWallet()
         {
             sessionStorage.removeItem('key')
-            this.connectedToWallet()
-            this.uploadedFiles = []
+            this.connectToWallet()
             this.txs = []
-            this.connectButtonLabel = "Connect wallet"
-            this.panelAddressLabel = "Wallet not connected"
+            this.selectedGasFeeModalLabel = ""
+            this.selectedGasDescriptionModalLabel = ""
+            this.editGasFeeModalLabel = ""
+            this.editGasDescriptionModalLabel = ""
             this.transactionReviewSenderLabel = ""
             this.transactionReviewReceiverLabel = ""
-            this.panelBalanceLabel = "Balance not available"
-            this.MessageService.add({key: 't1', severity:'info', summary: 'Info', detail: 'Wallet disconnected'});
+            this.totalFeeModalLabel = ""
             this.cdr.detectChanges()
         }       
+
 
         getInitialGasFee = () => new Promise((resolve,reject) =>
         {
@@ -461,9 +386,9 @@ export class IndexMainComponent implements OnInit {
                     ]
                     this.selectedPriorityRanges = this.priorityRanges[1]
 
-                    this.averageGasFeeModalLabel = gas.avg
+                    this.selectedGasFeeModalLabel = gas.avg
                     this.editGasFeeModalLabel = gas.avg
-                    this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.selectedGasDescriptionModalLabel = 'Completed in <30 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
                     this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(gas.avg)
                     this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
@@ -479,11 +404,11 @@ export class IndexMainComponent implements OnInit {
                     ]
                     this.selectedPriorityRanges = this.priorityRanges[0]
 
-                    this.averageGasFeeModalLabel = gas.low
+                    this.selectedGasFeeModalLabel = gas.low
                     this.editGasFeeModalLabel = gas.low
-                    this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                    this.selectedGasDescriptionModalLabel = 'Perhaps in 30 seconds'
                     this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
-                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this. selectedGasFeeModalLabel)
                     this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
@@ -497,11 +422,11 @@ export class IndexMainComponent implements OnInit {
                     ]
                     this.selectedPriorityRanges = this.priorityRanges[1]
 
-                    this.averageGasFeeModalLabel = gas.avg
+                    this.selectedGasFeeModalLabel = gas.avg
                     this.editGasFeeModalLabel = gas.avg
-                    this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                    this.selectedGasDescriptionModalLabel = 'Completed in <30 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
-                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this. selectedGasFeeModalLabel)
                     this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
@@ -515,11 +440,11 @@ export class IndexMainComponent implements OnInit {
                     ]
                     this.selectedPriorityRanges = this.priorityRanges[2]
 
-                    this.averageGasFeeModalLabel = gas.high
+                    this.selectedGasFeeModalLabel = gas.high
                     this.editGasFeeModalLabel = gas.high
-                    this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
+                    this.selectedGasDescriptionModalLabel = 'Completed in <15 seconds'
                     this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
-                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                    this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.selectedGasFeeModalLabel)
                     this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                 }
 
@@ -559,11 +484,11 @@ export class IndexMainComponent implements OnInit {
                                 ]
                                 this.selectedPriorityRanges = this.priorityRanges[1]
             
-                                this.averageGasFeeModalLabel = gas.avg
+                                this.selectedGasFeeModalLabel = gas.avg
                                 this.editGasFeeModalLabel = gas.avg
-                                this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.selectedGasDescriptionModalLabel = 'Completed in <30 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
-                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this. selectedGasFeeModalLabel)
                                 this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
@@ -577,11 +502,11 @@ export class IndexMainComponent implements OnInit {
                                 ]
                                 this.selectedPriorityRanges = this.priorityRanges[0]
             
-                                this.averageGasFeeModalLabel = gas.low
+                                this.selectedGasFeeModalLabel = gas.low
                                 this.editGasFeeModalLabel = gas.low
-                                this.averageGasDescriptionModalLabel = 'Perhaps in 30 seconds'
+                                this.selectedGasDescriptionModalLabel = 'Perhaps in 30 seconds'
                                 this.editGasDescriptionModalLabel = 'Perhaps in 30 seconds'
-                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this. selectedGasFeeModalLabel)
                                 this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
@@ -596,11 +521,11 @@ export class IndexMainComponent implements OnInit {
                                 ]
                                 this.selectedPriorityRanges = this.priorityRanges[1]
             
-                                this.averageGasFeeModalLabel = gas.avg
+                                this.selectedGasFeeModalLabel = gas.avg
                                 this.editGasFeeModalLabel = gas.avg
-                                this.averageGasDescriptionModalLabel = 'Completed in <30 seconds'
+                                this.selectedGasDescriptionModalLabel = 'Completed in <30 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <30 seconds'
-                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.selectedGasFeeModalLabel)
                                 this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
             
@@ -615,11 +540,11 @@ export class IndexMainComponent implements OnInit {
                                 ]
                                 this.selectedPriorityRanges = this.priorityRanges[2]
             
-                                this.averageGasFeeModalLabel = gas.high
+                                this.selectedGasFeeModalLabel = gas.high
                                 this.editGasFeeModalLabel = gas.high
-                                this.averageGasDescriptionModalLabel = 'Completed in <15 seconds'
+                                this.selectedGasDescriptionModalLabel = 'Completed in <15 seconds'
                                 this.editGasDescriptionModalLabel = 'Completed in <15 seconds'
-                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.averageGasFeeModalLabel)
+                                this.totalFeeModalLabel = parseFloat(this.txReviewAmountLabel) + parseFloat(this.selectedGasFeeModalLabel)
                                 this.totalFeeModalLabel = Math.round(this.totalFeeModalLabel * 1000000 + Number.EPSILON)/1000000
                             }
 
@@ -657,7 +582,7 @@ export class IndexMainComponent implements OnInit {
 
         sendTransaction()
         {
-            if(this.accountLoaded == true)
+            if(this.as.verifyConnectWallet() == true)
             {
                 this.txReviewModal = false
                 this.blockedDocument = true
@@ -672,7 +597,7 @@ export class IndexMainComponent implements OnInit {
                 const parsedAmount = ethers.utils.parseEther(toAmount)
                 console.log(ethers.utils.formatEther(parsedAmount))
                 const gLimit = 100000
-                const gPrice = (this.averageGasFeeModalLabel/gLimit) * 10 ** 18
+                const gPrice = (this. selectedGasFeeModalLabel/gLimit) * 10 ** 18
                 const toAddress = this.TokenFormGroup.value.inputAddress
                                 
                 //gasPrice: 
@@ -703,7 +628,7 @@ export class IndexMainComponent implements OnInit {
                         this.TokenFormGroup.reset()
                         this.stopTimer()
                         this.blockedDocument = false
-                        this.connectedToWallet()
+                        this.connectToWallet()
                         this.cdr.detectChanges()
                     })
 
