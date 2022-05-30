@@ -9,6 +9,7 @@ import {FieldsetModule} from 'primeng/fieldset';
 import { ethers } from 'ethers';
 
 import { AuthService } from '../app/shared/auth.service';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,7 @@ export class AppComponent {
   panelBalanceLabel = "Balance not available"
   accountLoaded = false
 
-  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private as:AuthService) 
+  constructor(private MessageService: MessageService,private cdr:ChangeDetectorRef,private as:AuthService,private aps:AppService) 
   { 
     this.as.ReadBalanceMethodCalled$.subscribe(()=>
     {
@@ -165,7 +166,7 @@ export class AppComponent {
                   address: node.address
               }
 
-              // this.ims.saveNewUserAddress(userAddressObj)
+              this.aps.saveNewUserAddress(userAddressObj)
 
               this.connectedToWallet()
               this.uploadedFiles = []

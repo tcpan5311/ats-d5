@@ -177,54 +177,6 @@ export class IndexMainComponent implements OnInit {
         return this.TokenFormGroup.controls;
     }
     
-    //     decryptFromPhase(mnemonic: any)
-    //     {
-    //         if(this.as.getToken() == undefined)
-    //         {
-    //             let walletPath = {
-    //                 "standard": "m/44'/60'/0'/0/0", 
-    //                 // Changing the last digit will give the sequence of address
-    //                 // For Ex: "m/44'/60'/0'/0/1" will give 2nd Address
-                
-    //             };
-                
-    //             try
-    //             {
-    //                 //mnemonic phase = "fault calm wash deal icon tattoo aware thumb brown merit barrel hamster";
-    //                 const hdnode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-    //                 const node = hdnode.derivePath(walletPath.standard);
-    //                 this.as.saveToken(node)
-    //                 const userAddressObj = 
-    //                 {
-    //                     address: node.address
-    //                 }
-
-    //                 this.ims.saveNewUserAddress(userAddressObj)
-
-    //                 this.connectedToWallet()
-    //                 this.uploadedFiles = []
-    //                 this.displayModal = false
-    //                 this.MessageService.add({key: 't1', severity:'success', summary: 'Success', detail: 'Wallet imported successfully'});
-    //             }
-    
-    //             catch(error)
-    //             {
-    //                 console.log(error)
-    //                 this.modal_msg = [
-    //                     {severity: 'error', summary: 'Error', detail: 'Invalid mnemonic phase provided'}
-    //                 ];
-    //             }
-    //         }
-
-    //         else
-    //         {
-    //             this.modal_msg = [
-    //                 {severity: 'error', summary: 'Error', detail: 'Wallet already imported'}
-    //             ];
-    //         }
-            
-    //     }
-
         connectToWallet()
         {
             if(this.as.verifyConnectWallet() == true)
