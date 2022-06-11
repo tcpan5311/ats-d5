@@ -29,14 +29,17 @@ import {FieldsetModule} from 'primeng/fieldset';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { TimelineModule } from "primeng/timeline";
 import {RadioButtonModule} from 'primeng/radiobutton';
+
 import { MintNftComponent } from './mint-nft/mint-nft.component';
+import { LiquidityPoolComponent } from './liquidity-pool/liquidity-pool.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     IndexMainComponent,
-    MintNftComponent
+    MintNftComponent,
+    LiquidityPoolComponent
   ],
   imports: [
     BrowserModule,
