@@ -12,7 +12,8 @@
                 <div class="p-inputgroup flex align-items-center justify-content-center">
 
                     <input pInputText  placeholder="0.0">
-                    <button type="button" class="p-button-raised p-button-help" pButton pRipple label="ETH" icon="pi pi-chevron-circle-down" iconPos="right"></button>
+                    <button type="button" class="p-button-raised p-button-help" pButton pRipple label="ETH" icon="pi pi-chevron-circle-down"
+                    iconPos="right" (click)="launchSelectTokenModal()"></button>
                     
                 </div>
 
@@ -42,3 +43,17 @@
         </p-card>
 
 </div>
+
+<p-dialog header="Select a token" [(visible)]="selectTokenModal" [modal]="true" [style]="{width: '60vw'}" [baseZIndex]="10000"
+    [draggable]="false" [resizable]="false" [maximizable]="true" [closable]="true">
+    
+<p-listbox [options]="tokens" [(ngModel)]="selectedToken" [metaKeySelection]="false" [checkbox]="false"
+  [filter]="true" [multiple]="false" optionLabel="name" [listStyle]="{'max-height':'200px'}">
+  <ng-template let-token pTemplate="item">
+    <div class="token-item">
+      <div>{{token.name}}</div>
+    </div>
+  </ng-template>
+</p-listbox>
+
+</p-dialog>

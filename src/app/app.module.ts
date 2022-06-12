@@ -29,6 +29,7 @@ import {FieldsetModule} from 'primeng/fieldset';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { TimelineModule } from "primeng/timeline";
 import {RadioButtonModule} from 'primeng/radiobutton';
+import {ListboxModule} from 'primeng/listbox';
 
 import { MintNftComponent } from './mint-nft/mint-nft.component';
 import { LiquidityPoolComponent } from './liquidity-pool/liquidity-pool.component';
@@ -66,7 +67,8 @@ import { LiquidityPoolComponent } from './liquidity-pool/liquidity-pool.componen
     FieldsetModule,
     DynamicDialogModule,
     TimelineModule,
-    RadioButtonModule
+    RadioButtonModule,
+    ListboxModule
   ],
   providers: [HostListener],
   bootstrap: [AppComponent]
