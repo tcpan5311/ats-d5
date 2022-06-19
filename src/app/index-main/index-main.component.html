@@ -14,24 +14,21 @@
 <div class = "col-5 col-md-5  main-form">
     <p-card header="Send">
 
-
-        <!-- <form [formGroup]="TokenFormGroup" (ngSubmit)="sendTransaction()"> -->
         <form [formGroup]="TokenFormGroup" (ngSubmit)="confirmFeeModal()">
 
             <div class="p-inputgroup">
                 
                 <span class="p-inputgroup-addon">ETH</span>
-                <input type="text" pInputText placeholder="Amount"
+                <input type="number" pInputText placeholder="Amount"
                 formControlName="inputAmount" class="form-control">   
-                <!-- <span class="p-inputgroup-addon">.00</span>      -->
                 <br>
             
             </div>
 
             <div *ngIf="f.inputAmount?.touched && f.inputAmount?.invalid">
-                <p-message *ngIf="f.inputAmount.errors?.required" severity="error" text="Amount is required."></p-message>
-                <p-message *ngIf="f.inputAmount.errors?.pattern" severity="error" text="Invalid format"></p-message>
-                <p-message *ngIf="f.inputAmount.errors?.max" severity="error" text="Amount cannot be greater than 10000"></p-message>
+                <p-message *ngIf="f.inputAmount.errors?.nullInput" severity="error" text="Amount is required."></p-message>
+                <p-message *ngIf="f.inputAmount.errors?.invalidInput" severity="error" text="Amount cannot be equal or smaller than zero"></p-message>
+                <p-message *ngIf="f.inputAmount.errors?.outerBoundInput" severity="error" text="Amount cannot be greater than 10000"></p-message>
             </div>
         
             <br>
@@ -43,15 +40,14 @@
             </div>
 
             <div *ngIf="f.inputAddress?.touched && f.inputAddress?.invalid">
-                <p-message *ngIf="f.inputAddress.errors?.required" severity="error" text="Address is required."></p-message>
+                <p-message *ngIf="f.inputAddress.errors?.nullInput" severity="error" text="Address is required."></p-message>
                 <p-message *ngIf="f.inputAddress.errors?.addressValid" severity="error" text="Invalid address format"></p-message>
             </div>
         
             <br>
 
             <button #btnSend type="button" icon="pi pi-send" pButton label="Send" type="submit" [disabled]="!TokenFormGroup.valid"></button>
-            <!-- <button #btnSend type="button" icon="pi pi-send" pButton label="Send" type="submit" [disabled]="!TokenFormGroup.valid"></button> -->
-
+        
         </form>
 
     

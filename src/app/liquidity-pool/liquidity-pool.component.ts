@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import {InputTextModule} from 'primeng/inputtext';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
+import {DialogService} from 'primeng/dynamicdialog';
+import {Message,MessageService} from 'primeng/api';
 
 @Component({
   selector: 'app-liquidity-pool',
   templateUrl: './liquidity-pool.component.html',
-  styleUrls: ['./liquidity-pool.component.scss']
+  styleUrls: ['./liquidity-pool.component.scss'],
+  providers: [DialogService,MessageService]
 })
 export class LiquidityPoolComponent implements OnInit {
 
@@ -13,11 +17,35 @@ export class LiquidityPoolComponent implements OnInit {
   tokens: any = []
   selectedToken: any
 
+  LPFormGroup !: FormGroup
+
   constructor() { }
 
   ngOnInit(): void 
   {
+    
+    function LPFormInputValidator(control: AbstractControl): { [key: string]: boolean } | null
+    {
+      
+      if(control.value == null)
+      {
+        return {"nullInput" : true };
+      }
 
+      else if(control.value <=0)
+      {
+        return {"invalidInput" : true };
+      }
+
+      return null
+    }
+
+    this.LPFormGroup = new FormGroup 
+    ({
+        inputFirst:  new FormControl(null, [LPFormInputValidator]),
+        inputSecond:  new FormControl(null, [LPFormInputValidator]),
+    });
+    
     this.tokens = [
       { name: "Ethereum", code: "ETH" },
       { name: "Wrapped Bitcoin", code: "WBTC" },
@@ -31,9 +59,19 @@ export class LiquidityPoolComponent implements OnInit {
 
   }
 
+  get f()
+  {
+      return this.LPFormGroup.controls;
+  }
+
   launchSelectTokenModal()
   {
     this.selectTokenModal = true
+  }
+
+  confirmSwapModal()
+  {
+    console.log("Swap successful")
   }
 
 }

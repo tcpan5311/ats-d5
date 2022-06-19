@@ -105,7 +105,28 @@ export class IndexMainComponent implements OnInit {
 
     let amount_regex = "^[0-9]*(\.[0-9]{0,2})?$"
 
-    function addressFormatValidator(control: AbstractControl): { [key: string]: boolean } | null {
+    function amountValidator(control: AbstractControl): { [key: string]: boolean } | null 
+    {
+        if(control.value == null)
+        {
+            return {"nullInput" : true };
+        }
+
+        else if(control.value <=0)
+        {
+            return {"invalidInput" : true };
+        }
+
+        else if(control.value >= 10000)
+        {
+            return {"outerBoundInput" : true };
+        }
+
+        return null
+    }
+
+    function addressFormatValidator(control: AbstractControl): { [key: string]: boolean } | null 
+    {
 
        function isNotAddress(address:string)
        {
@@ -121,18 +142,23 @@ export class IndexMainComponent implements OnInit {
             
        }
 
-        if (control.value !== undefined && control.value != "" && isNotAddress(control.value)) 
+       if(control.value == "")
+       {
+            return { 'nullInput': true };
+       }
+
+        else if (control.value !== undefined && control.value != "" && isNotAddress(control.value)) 
         {
             return { 'addressValid': true };
         }
         
-        return null;
+        return null
         
     }
 
     this.TokenFormGroup = new FormGroup({
-        inputAmount:  new FormControl('', [Validators.required, Validators.pattern(amount_regex), Validators.max(10000)]),
-        inputAddress:  new FormControl('', [Validators.required,addressFormatValidator]),
+        inputAmount:  new FormControl(null, [amountValidator]),
+        inputAddress:  new FormControl("", [addressFormatValidator]),
       });
   
        
@@ -544,8 +570,7 @@ export class IndexMainComponent implements OnInit {
                 const contractABI = this.ims.getContractABI()
                 const wallet = new ethers.Wallet(this.as.getToken().privateKey,provider)
                 const contract = new ethers.Contract(contractAddress,contractABI,wallet)
-
-                const toAmount = this.TokenFormGroup.value.inputAmount
+                const toAmount = this.TokenFormGroup.value.inputAmount.toString()
                 const parsedAmount = ethers.utils.parseEther(toAmount)
                 console.log(ethers.utils.formatEther(parsedAmount))
                 const gLimit = 100000

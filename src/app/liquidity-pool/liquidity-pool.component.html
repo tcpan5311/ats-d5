@@ -7,39 +7,50 @@
 
         <p-card class="col-5 col-md-5" header="Swap">
 
+            <form [formGroup]="LPFormGroup" (ngSubmit)="confirmSwapModal()">
+
             <div class="flex flex-column card-container">
-
-                <div class="p-inputgroup flex align-items-center justify-content-center">
-
-                    <input pInputText  placeholder="0.0">
-                    <button type="button" class="p-button-raised p-button-help" pButton pRipple label="ETH" icon="pi pi-chevron-circle-down"
-                    iconPos="right" (click)="launchSelectTokenModal()"></button>
-                    
-                </div>
-
-                <br>
-                <div class="p-inputgroup flex align-items-center justify-content-center">
-                    <button pButton type="button" icon="pi pi-sort-alt" class="p-button-rounded p-button-help"></button>
-                </div>
-                <br>
                 
-                <div class="p-inputgroup flex align-items-center justify-content-center">
+                    <div class="p-inputgroup flex align-items-center justify-content-center">
 
-                    <input pInputText placeholder="0.0">  
-                    <button type="button" class="p-button-raised p-button-help" pButton pRipple label="Select a token" icon="pi pi-chevron-circle-down" iconPos="right"></button>
+                        <input type="number" pInputText formControlName="inputFirst" class="form-control"  placeholder="0.0">
+                        <button type="button" class="p-button-raised p-button-help" pButton pRipple label="ETH" icon="pi pi-chevron-circle-down"
+                        iconPos="right" (click)="launchSelectTokenModal()"></button>
+                    
+                    </div>
 
-                </div>
+                    <div *ngIf="f.inputFirst?.touched && f.inputFirst?.invalid">
+                        <p-message *ngIf="f.inputFirst.errors?.nullInput" severity="error" text="Input cannot be empty"></p-message>
+                        <p-message *ngIf="f.inputFirst.errors?.invalidInput" severity="error" text="Input cannot be equal or smaller than zero"></p-message>
+                    </div>
+                    <br>
 
-                <br>
+                    <div class="p-inputgroup flex align-items-center justify-content-center">
+                        <button pButton type="button" icon="pi pi-sort-alt" class="p-button-rounded p-button-help"></button>
+                    </div>
+                    <br>
+                
+                    <div class="p-inputgroup flex align-items-center justify-content-center">
+
+                        <input type="number" pInputText placeholder="0.0" formControlName="inputSecond" class="form-control">  
+                        <button type="button" class="p-button-raised p-button-help" pButton pRipple label="Select a token" icon="pi pi-chevron-circle-down" iconPos="right"></button>
+
+                    </div>
+
+                    <div *ngIf="f.inputSecond?.touched && f.inputSecond?.invalid">
+                        <p-message *ngIf="f.inputSecond.errors?.nullInput" severity="error" text="Input cannot be empty"></p-message>
+                        <p-message *ngIf="f.inputSecond.errors?.invalidInput" severity="error" text="Input cannot be equal or smaller than zero"></p-message>
+                    </div>
                 
             </div>
 
             <div class="flex justify-content-end flex-wrap">
                 <div class="flex align-items-center justify-content-center">
-                    <p-button label="Swap" styleClass="p-button-lg p-button-rounded p-button-help"></p-button>
+                    <p-button label="Swap" type="submit" [disabled]="!LPFormGroup.valid" styleClass="p-button-lg p-button-rounded p-button-help"></p-button>
                 </div>
             </div>
 
+        </form>
         </p-card>
 
 </div>
