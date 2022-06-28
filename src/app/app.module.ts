@@ -33,7 +33,8 @@ import {ListboxModule} from 'primeng/listbox';
 import {InputNumberModule} from 'primeng/inputnumber';
 
 import { MintNftComponent } from './mint-nft/mint-nft.component';
-import { LiquidityPoolComponent } from './liquidity-pool/liquidity-pool.component';
+import { LiquiditySwapComponent } from './liquidity-swap/liquidity-swap.component';
+import { AddLiquidityPoolComponent } from './add-liquidity-pool/add-liquidity-pool.component';
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { LiquidityPoolComponent } from './liquidity-pool/liquidity-pool.componen
     AppComponent,
     IndexMainComponent,
     MintNftComponent,
-    LiquidityPoolComponent
+    LiquiditySwapComponent,
+    AddLiquidityPoolComponent
   ],
   imports: [
     BrowserModule,

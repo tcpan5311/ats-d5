@@ -46,14 +46,15 @@ export class AppComponent {
 
     this.items = [
 
-      // {
-      //     icon:'logo-icon'
-      // },
+    //   {
+    //       icon:'logo-icon'
+    //   },
       
       {
           label: 'Send',
           icon: 'pi pi-send'
       },
+      
       {
           label: 'Swap',
           icon: ' pi pi-sort-alt'
@@ -62,17 +63,17 @@ export class AppComponent {
       {
           label: 'Pool',
           icon: 'pi pi-database'
-      },
-
-      {
-          label:'Vote',
-          icon: 'pi pi-id-card'
-      },
-
-      {
-          label:'Charts',
-          icon: 'pi pi-chart-line'
       }
+
+    //   {
+    //       label:'Vote',
+    //       icon: 'pi pi-id-card'
+    //   },
+
+    //   {
+    //       label:'Charts',
+    //       icon: 'pi pi-chart-line'
+    //   }
 
   ];
 

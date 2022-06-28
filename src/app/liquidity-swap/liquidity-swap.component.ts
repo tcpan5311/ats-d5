@@ -5,12 +5,12 @@ import {DialogService} from 'primeng/dynamicdialog';
 import {Message,MessageService} from 'primeng/api';
 
 @Component({
-  selector: 'app-liquidity-pool',
-  templateUrl: './liquidity-pool.component.html',
-  styleUrls: ['./liquidity-pool.component.scss'],
+  selector: 'app-liquidity-swap',
+  templateUrl: './liquidity-swap.component.html',
+  styleUrls: ['./liquidity-swap.component.scss'],
   providers: [DialogService,MessageService]
 })
-export class LiquidityPoolComponent implements OnInit {
+export class LiquiditySwapComponent implements OnInit {
 
   selectTokenModal: any
 
